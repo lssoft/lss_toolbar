@@ -1,0 +1,185 @@
+<html>
+<head>
+<title>2 Faces + Path</title>
+<meta http-equiv="Content-Type" content="text/html; charset=win-1251">
+<link href="lss_tool.css" rel="stylesheet" type="text/css">
+<script type="text/JavaScript" src="jsDraw2D/jsDraw2D.js"></script> 
+<script type="text/javascript" src="lss_common.js" charset="win-1251"></script>
+<script type="text/javascript" src="pathface.js" charset="win-1251"></script>
+<script>
+window.dhx_globalImgPath = "dhtmlxSlider/codebase/imgs/";
+</script>
+<script  src="dhtmlxSlider/codebase/dhtmlxcommon.js"></script>
+<script  src="dhtmlxSlider/codebase/dhtmlxslider.js"></script>
+<script  src="dhtmlxSlider/codebase/ext/dhtmlxslider_start.js"></script>
+<link rel="STYLESHEET" type="text/css" href="dhtmlxSlider/codebase/dhtmlxslider.css">    
+</head>
+<body class="body" onload="obtain_defaults()" onfocus="callRuby('get_settings')" onkeyup="key_up_body(event)">
+	<table id="settings_table" class="page_tbl">
+		<tbody id="pathface_tool_settings">
+			<tr>
+				<td class="info_img_cell">
+					<img src="images/buttons/pathface_24.gif">
+				</td>
+				<td class="tbl_hdr">
+					&nbsp;2 Faces + Path...
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell" id="first_face_cell">
+					<div id="first_face_canvas" style="overflow:hidden;position:relative;width:32px;height:32px;" title="Picked face thumbnail"></div>
+				</td>
+				<td class="setting_cell">
+					<table width=100%>
+						<tr>
+							<td>
+								First face
+							</td>
+							<td align="right" valign="top"><input type="button" onclick="pick_first_face()" value="Pick >>"/><td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell" id="first_face_mat_cell">
+					<div id="first_face_mat_canvas" style="overflow:hidden;position:relative;width:32px;height:32px;" title="Materials colors of picked face"></div>
+				</td>
+				<td class="setting_cell">
+					<img src="images/info_imgs/pathface/pathface_flip_norm.gif" class="speed_btn" onclick="click_speed(this)" onmouseover="speed_btn_over(this)" onmouseout="speed_btn_out(this)" id="flip_norm_first" alt="Flip face normal">
+					&nbsp;
+					<img src="images/info_imgs/pathface/pathface_dock_verts.gif" class="speed_btn" onclick="click_speed(this)" onmouseover="speed_btn_over(this)" onmouseout="speed_btn_out(this)" id="dock_verts_first" alt="Rotate face to dock vertices with other face">
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell" id="second_face_cell">
+					<div id="second_face_canvas" style="overflow:hidden;position:relative;width:32px;height:32px;" title="Picked face thumbnail"></div>
+				</td>
+				<td class="setting_cell">
+					<table width=100%>
+						<tr>
+							<td>
+								Second face
+							</td>
+							<td align="right" valign="top"><input type="button" onclick="pick_second_face()" value="Pick >>"/><td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell" id="second_face_mat_cell">
+					<div id="second_face_mat_canvas" style="overflow:hidden;position:relative;width:32px;height:32px;" title="Materials colors of picked face"></div>
+				</td>
+				<td class="setting_cell">
+					<img src="images/info_imgs/pathface/pathface_flip_norm.gif" class="speed_btn" onclick="click_speed(this)" onmouseover="speed_btn_over(this)" onmouseout="speed_btn_out(this)" id="flip_norm_second" alt="Flip face normal">
+					&nbsp;
+					<img src="images/info_imgs/pathface/pathface_dock_verts.gif" class="speed_btn" onclick="click_speed(this)" onmouseover="speed_btn_over(this)" onmouseout="speed_btn_out(this)" id="dock_verts_second" alt="Rotate face to dock vertices with other face">
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell" id="path_curve_cell">
+					<div id="path_curve_canvas" style="overflow:hidden;position:relative;width:32px;height:32px;" title="Picked path curve thumbnail"></div>
+				</td>
+				<td class="setting_cell">
+					<table width=100%>
+						<tr>
+							<td>
+								Path curve
+							</td>
+							<td align="right" valign="top"><input type="button" onclick="pick_path_curve()" value="Pick >>"/><td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell">
+					
+				</td>
+				<td class="setting_cell">
+					<img src="images/info_imgs/pathface/pathface_reverse_path.gif" class="speed_btn" onclick="click_speed(this)" onmouseover="speed_btn_over(this)" onmouseout="speed_btn_out(this)" id="reverse_path" alt="Reverse path curve">
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+		</tbody>
+		<tbody id="pathface_tool_settings">
+			<tr>
+				<td class="info_img_cell">
+					&nbsp;
+				</td>
+				<td class="tbl_hdr">
+					&nbsp;Tool Settings
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					Result options<br>
+					<span id="result_type_chk_grp">
+					<img src="images/info_imgs/pathface/pathface_faces.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="generate_faces" alt="Generate intermediate faces">
+					<img src="images/info_imgs/pathface/pathface_surf.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="generate_surf" alt="Generate surface">
+					<img src="images/info_imgs/pathface/pathface_tracks.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="generate_tracks" alt="Generate vertices tracks">
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					Alignment options<br>
+					<span id="align_chk_grp">
+					<img src="images/info_imgs/pathface/pathface_align.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="align2path" alt="Align faces to path">
+					<img src="images/info_imgs/pathface/pathface_center.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="center2path" alt="Center faces to path">
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					Capping options<br>
+					<span id="cap_chk_grp">
+					<img src="images/info_imgs/pathface/pathface_cap_start.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="cap_start" alt="Cap start">
+					<img src="images/info_imgs/pathface/pathface_cap_end.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="cap_end" alt="Cap end">
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					Soft/smooth type<br>
+					<span id="surf_opts_radio_grp">
+					<input type="hidden" id="soft_smooth_surf">
+					<img src="images/info_imgs/pathface/pathface_no_soft_smooth.gif" class="radio_selected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="no_soft_smooth" alt="Nor soft nither smooth">
+					<img src="images/info_imgs/pathface/pathface_soft.gif" class="radio_unselected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="soft" alt="Soft">
+					<img src="images/info_imgs/pathface/pathface_smooth.gif" class="radio_unselected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="smooth" alt="Smooth">
+					<img src="images/info_imgs/pathface/pathface_soft_smooth.gif" class="radio_unselected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="soft_smooth" alt="Soft and smooth">
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					<br>
+					<div title="Affects preview only">Transparency level</div><br>
+					<input type="hidden" id="transp_level" width="3">
+					<div id="slider_div"></div>
+					<br>
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+		</tbody>
+	</table>
+	<table id="bottom_tbl" class="bottom_tbl">
+		<tr>
+			<td align="left">
+				
+			</td>
+			<td align="right">
+				<input type="button" onclick="reset_tool()" value="Reset"/>
+				<input type="button" onclick="apply_settings()" value="Apply" />
+			</td>
+		</tr>
+	</table>
+</body>
+</html>
