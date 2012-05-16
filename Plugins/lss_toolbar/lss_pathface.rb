@@ -9,7 +9,7 @@
 # IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-#~ lss_pathface.rb ver. 1.0 17-Apr-12
+#~ lss_pathface.rb ver. 1.0 16-May-12
 #~ Plug-in, which creates blended object from 2 faces + path curve
 
 require 'lss_toolbar/lss_tlbr_utils.rb'
@@ -424,6 +424,13 @@ class Lss_PathFace_Entity
 				morph_norm=Geom::Vector3d.new(path_dir_vec)
 			end
 			if step==0
+				# Handle closed curve case (added 16.05.12)
+				if @path_curve.vertices.first.position==@path_curve.vertices.last.position
+					prev_dir_vec=@path_curve.vertices[step-2].position.vector_to(@path_curve.vertices[step].position)
+					sum_dir_vec=path_dir_vec.normalize+prev_dir_vec.normalize
+					sum_dir_vec.normalize!
+					path_dir_vec=Geom::Vector3d.new(sum_dir_vec)
+				end
 				start_pos_tr=Geom::Transformation.new(Geom::Point3d.new(0,0,0), path_dir_vec)
 				@face1_path_aligned_pts=Array.new
 				@first_face_aligned_pts.each_index{|ind|
@@ -970,9 +977,10 @@ class Lss_PathFace_Tool
 					@path_curve.vertices.each{|vert|
 						result1 = face1.classify_point(vert.position) if face1
 						result2 = face2.classify_point(vert.position) if face2
-						coincide_cnt1+=1 if result1==4
-						coincide_cnt2+=1 if result2==4
+						coincide_cnt1+=1 if result1==2 # 2: Sketchup::Face::PointOnVertex (point touches a vertex) 16.05.12.
+						coincide_cnt2+=1 if result2==2 # 2: Sketchup::Face::PointOnVertex (point touches a vertex)
 					}
+					puts @path_curve.vertices.length
 					erase_path=false
 					if coincide_cnt1==@path_curve.vertices.length or coincide_cnt2==@path_curve.vertices.length
 						erase_path=true 
@@ -985,6 +993,7 @@ class Lss_PathFace_Tool
 
 		#   Finding start and end face
 		@first_face=face1 if face1
+		@second_face=face2 if face2 # fix 16.05.12
 		if face1 and @path_curve
 			face1_dist=face1.bounds.center.distance @path_curve.vertices[0].position
 			face2_dist=face2.bounds.center.distance @path_curve.vertices[0].position if face2
