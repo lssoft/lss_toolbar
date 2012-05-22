@@ -1,0 +1,127 @@
+<html>
+<head>
+<title>Voxelate</title>
+<meta http-equiv="Content-Type" content="text/html; charset=win-1251">
+<link href="lss_tool.css" rel="stylesheet" type="text/css">
+<script type="text/JavaScript" src="jsDraw2D/jsDraw2D.js"></script> 
+<script type="text/javascript" src="lss_common.js" charset="win-1251"></script>
+<script type="text/javascript" src="voxelate.js" charset="win-1251"></script>
+<script>
+</script>
+<link rel="STYLESHEET" type="text/css" href="dhtmlxSlider/codebase/dhtmlxslider.css">    
+</head>
+<body class="body" onload="obtain_defaults()" onkeyup="key_up_body(event)">
+	<table id="settings_table" class="page_tbl">
+		<tbody id="voxelate_tool_settings">
+			<tr>
+				<td class="info_img_cell">
+					<img src="images/buttons/voxelate_24.gif">
+				</td>
+				<td class="tbl_hdr">
+					&nbsp;Voxelate
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell">
+					<img src="images/info_imgs/green_chkd.gif" style="display:none" id="group_is_picked">
+				</td>
+				<td class="setting_cell">
+					<table width=100%>
+						<tr>
+							<td title="Group to voxelate">
+								Group
+							</td>
+							<td align="right" valign="top"><input type="button" onclick="pick_group()" value="Pick >>"/><td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell">
+					<img src="images/info_imgs/green_chkd.gif" style="display:none" id="comp_is_picked">
+				</td>
+				<td class="setting_cell">
+					<table width=100%>
+						<tr>
+							<td title="Alternative voxel component instance">
+								Voxel
+							</td>
+							<td align="right" valign="top"><input type="button" onclick="pick_voxel_comp()" value="Pick >>"/><td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+		</tbody>
+		<tbody id="voxelate_tool_settings">
+			<tr>
+				<td class="info_img_cell">
+					&nbsp;
+				</td>
+				<td class="tbl_hdr">
+					&nbsp;Tool Settings
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					Voxel type<br>
+					<span id="voxel_type_radio_grp">
+					<input type="hidden" id="voxel_type">
+					<img src="images/info_imgs/voxelate/voxel.gif" class="radio_selected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="voxel" alt="Voxel box">
+					<img src="images/info_imgs/voxelate/c_point.gif" class="radio_unselected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="c_point" alt="Construction point">
+					<img src="images/info_imgs/voxelate/comp_inst.gif" class="radio_unselected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="comp_inst" alt="Component instance">
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					<br>
+					<div id="three_sizes_block">
+					<table>
+						<tr>
+							<td>Voxel&nbsp;X-size</td><td><input type="text" id="voxel_x_size" value="0" size="6" onchange="send_setting(this)" onkeydown="key_dwn(this)"></td>
+						</tr>
+						<tr>
+							<td>Voxel&nbsp;Y-size</td><td><input type="text" id="voxel_y_size" value="0" size="6" onchange="send_setting(this)" onkeydown="key_dwn(this)"></td>
+						</tr>
+						<tr>
+							<td>Voxel&nbsp;Z-size</td><td><input type="text" id="voxel_z_size" value="0" size="6" onchange="send_setting(this)" onkeydown="key_dwn(this)"></td>
+						</tr>
+					</table>
+					</div>
+					<div id="uniform_size_block" style="display:none">Voxel&nbsp;size&nbsp;<input type="text" id="uniform_size" value="0" size="4" onchange="send_setting(this)" onkeydown="key_dwn(this)"><br></div>
+					<div id="uniform_size_check"><input type="checkbox" id="lock_sizes" onclick="lock_sizes(this)"><span title="Make all dimentions (X, Y, Z) the same size, i.e. cubic voxel.">&nbsp;Uniform size</span><br></div>
+					<div id="use_comp_size_check" style="display:none"><input type="checkbox" id="use_comp_size" onclick="use_component_sizes(this)"><span title="Use component bounding box size as voxel size.">&nbsp;Use component size</span></div>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					<br>
+					More options<br>
+					<img src="images/info_imgs/voxelate/fill_with_voxels.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="fill_with_voxels" alt="Fill group with voxels">
+					<img src="images/info_imgs/voxelate/show_voxelating.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="show_voxelating" alt="Show voxelating process">
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+		</tbody>
+	</table>
+	<table id="bottom_tbl" class="bottom_tbl">
+		<tr>
+			<td align="left">
+				
+			</td>
+			<td align="right">
+				<input type="button" onclick="reset_tool()" value="Reset"/>
+				<input type="button" onclick="apply_settings()" value="Apply" />
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

@@ -5,3 +5,35 @@
 "Set of tools, which provides new geometry creation and advanced manipulation."="Set of tools, which provides new geometry creation and advanced manipulation.";
 //lss_toolbar.rb
 "LSS Tools"="LSS Tools";
+//lss_pathface.rb
+"2 Faces + Path..."="2 Faces + Path...";
+"Click to activate '2 Faces + Path...' tool."="Click to activate '2 Faces + Path...' tool.";
+"LSS Pathface Processing"="LSS Pathface Processing";
+"Generating faces:"="Generating faces:";
+"Generating vertices tracks:"="Generating vertices tracks:";
+"Generating surface:"="Generating surface:";
+"2 Faces + Path"="2 Faces + Path";
+"Pick 2 faces and path curve before launching 'Apply'"="Pick 2 faces and path curve before launching 'Apply'";
+"Face 1"="Face 1";
+"Face 2"="Face 2";
+"Path curve"="Path curve";
+"Start"="Start";
+"End"="End";
+"Try to pick a face."="Try to pick a face.";
+"Try to pick a curve."="Try to pick a curve.";
+//lss_voxelate.rb
+"Voxelate"="Voxelate";
+"Click to activate 'Voxelate' tool."="Click to activate 'Voxelate' tool.";
+"Total count of voxel positions within bounding box of selected group is "="Total count of voxel positions within bounding box of selected group is ";
+"Process selected group anyway?"="Process selected group anyway?";
+"Voxelating is in progress:"="Voxelating is in progress:";
+"'Component Instance' voxel type was chosen, but there was no actual component instance provided."="'Component Instance' voxel type was chosen, but there was no actual component instance provided.";
+"It is possible if no component instance was picked in dialog or it was deleted before refreshing."="It is possible if no component instance was picked in dialog or it was deleted before refreshing.";
+"Would You like to switch voxel type to 'Voxel' and continue processing?"="Would You like to switch voxel type to 'Voxel' and continue processing?";
+"('No' - cancels processing)"="('No' - cancels processing)";
+"LSS Voxelating"="LSS Voxelating";
+"Populating with voxels:"="Populating with voxels:";
+"Voxelate"="Voxelate";
+"Pick group before clicking 'Apply'"="Pick group before clicking 'Apply'";
+"Try to pick a group."="Try to pick a group.";
+"Try to pick a component instance."="Try to pick a component instance.";

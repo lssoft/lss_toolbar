@@ -24,8 +24,16 @@ function apply_defaults(){
 		}
 		var input_ctrl=document.getElementById(settings_arr[i][0]);
 		if (input_ctrl) {
-			if (typeof input_ctrl.value == 'string') {
+			if (input_ctrl.type == 'text') {
 				input_ctrl.value=settings_arr[i][1];
+			}
+			if (input_ctrl.type == 'checkbox') {
+				if (settings_arr[i][1]=='true'){
+					input_ctrl.checked=true;
+				}
+				else{
+					input_ctrl.checked=false;
+				}
 			}
 		}
 	}
@@ -146,4 +154,10 @@ function send_slider_val(val_name, val) {
 
 function key_up_body(event){
 
+}
+
+function key_dwn(field) {
+	if (event.keyCode==13) {
+		send_setting(field);
+	}
 }

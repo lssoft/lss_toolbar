@@ -1,16 +1,18 @@
-#~ '(C) Links System Software 2009-2012
-#~ 'Feedback information
-#~ 'www: http://lss2008.livejournal.com/
-#~ 'E-mail1: designer@ls-software.ru
-#~ 'E-mail2: kirill2007_77@mail.ru
-#~ 'icq: 328-958-369
+# lss_pathface.rb ver. 1.0 16-May-12
+# The script, which creates blended object from 2 faces + path curve
+
+# (C) Links System Software 2009-2012
+# Feedback information
+# www: http://sites.google.com/site/lssoft2011/
+# blog: lss2008.blogspot.com
+# YouTube: LSSoft2010
+# E-mail1: designer@ls-software.ru
+# E-mail2: kirill2007_77@mail.ru
+# icq: 328-958-369
 
 # THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
 # IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-
-#~ lss_pathface.rb ver. 1.0 16-May-12
-#~ Plug-in, which creates blended object from 2 faces + path curve
 
 require 'lss_toolbar/lss_tlbr_utils.rb'
 
@@ -731,7 +733,7 @@ class Lss_PathFace_Tool
 		self.pathface_read_defaults
 		
 		# Create the WebDialog instance
-		@pathface_dialog = UI::WebDialog.new($lsstoolbarStrings.GetString("2 Faces + Path"), true, "LSS Chronolux", 350, 400, 200, 200, true)
+		@pathface_dialog = UI::WebDialog.new($lsstoolbarStrings.GetString("2 Faces + Path"), true, "LSS Toolbar", 350, 400, 200, 200, true)
 		@pathface_dialog.max_width=550
 		@pathface_dialog.min_width=380
 		
@@ -905,7 +907,7 @@ class Lss_PathFace_Tool
 		self.settings2hash
 		@settings_hash.each_key{|key|
 			if @settings_hash[key][1]=="distance"
-				setting_pair_str= key.to_s + "|" + Sketchup.format_length(chronolux_attrdict[key]).to_s
+				setting_pair_str= key.to_s + "|" + Sketchup.format_length(@settings_hash[key][0]).to_s
 			else
 				setting_pair_str= key.to_s + "|" + @settings_hash[key][0].to_s
 			end

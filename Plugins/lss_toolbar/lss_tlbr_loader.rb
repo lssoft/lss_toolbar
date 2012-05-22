@@ -17,6 +17,9 @@ require 'lss_toolbar/lss_toolbar.rb'
 #initializes '2 Faces Plus Path...' tool
 require 'lss_toolbar/lss_pathface.rb'
 
+#initializes 'Voxelate' tool
+require 'lss_toolbar/lss_voxelate.rb'
+
 #initializes scripts, which are common for all tools (refresh, tools observer etc)
 require 'lss_toolbar/lss_tlbr_common.rb'
 
