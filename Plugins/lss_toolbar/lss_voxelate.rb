@@ -28,7 +28,7 @@ class Lss_Voxelate_Cmd
 		$lssToolbar.add_item(lss_voxelate_cmd)
 		$lssMenu.add_item(lss_voxelate_cmd)
 	end
-end #class Lss_PathFace_Cmds
+end #class Lss_Voxelate_Cmd
 
 class Lss_Voxelate_Entity
 	# Objects
@@ -415,7 +415,7 @@ class Lss_Voxelate_Refresh
 						
 						@voxelate_entity.voxels_group.transform!(@voxels_group_transformation) if @voxels_group_transformation
 						
-						# Clear from previous 'pathface object' identification, since new one was created  after 'pathface_entity.generate_results'
+						# Clear from previous 'voxelate object' identification, since new one was created  after 'voxelate_entity.generate_results'
 						@group2voxelate.attribute_dictionaries.delete(lss_voxelate_attr_dict_name)
 						@voxel_inst.attribute_dictionaries.delete(lss_voxelate_attr_dict_name) if @voxel_inst
 					end
@@ -901,7 +901,7 @@ class Lss_Voxelate_Tool
 		return dir_path
 	end
 	
-end #class Lss_PathFace_Tool
+end #class Lss_Voxelate_Tool
 
 
 if( not file_loaded?("lss_voxelate.rb") )

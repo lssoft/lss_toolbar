@@ -32,19 +32,24 @@ class Lss_Common_Cmds
 			attrdicts = model.attribute_dictionaries
 			lss_toolbar_objs_dict = attrdicts["lss_toolbar_objects"]
 			lss_toolbar_refresh_cmds = attrdicts["lss_toolbar_refresh_cmds"]
-			if lss_toolbar_objs_dict.keys.length==0
+			if lss_toolbar_objs_dict
+				if lss_toolbar_objs_dict.keys.length==0
+					UI.messagebox($lsstoolbarStrings.GetString("There are no LSS Toolbar objects detected in selection."))
+					return
+				else
+					lss_toolbar_objs_dict.each_key{|lss_obj_name|
+						refresh_cmd_str=lss_toolbar_refresh_cmds[lss_obj_name]
+						begin
+							eval(refresh_cmd_str)
+						rescue Exception => e
+							puts(e.message)
+							puts(e.backtrace)
+						end
+					}
+				end
+			else
 				UI.messagebox($lsstoolbarStrings.GetString("There are no LSS Toolbar objects detected in selection."))
 				return
-			else
-				lss_toolbar_objs_dict.each_key{|lss_obj_name|
-					refresh_cmd_str=lss_toolbar_refresh_cmds[lss_obj_name]
-					begin
-						eval(refresh_cmd_str)
-					rescue Exception => e
-						puts(e.message)
-						puts(e.backtrace)
-					end
-				}
 			end
 		}
 		lss_refresh_cmd.small_icon = "./tb_icons/refresh_16.png"

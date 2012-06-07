@@ -20,6 +20,9 @@ require 'lss_toolbar/lss_pathface.rb'
 #initializes 'Voxelate' tool
 require 'lss_toolbar/lss_voxelate.rb'
 
+#initializes 'Make Recursive...' tool
+require 'lss_toolbar/lss_recursive.rb'
+
 #initializes scripts, which are common for all tools (refresh, tools observer etc)
 require 'lss_toolbar/lss_tlbr_common.rb'
 
