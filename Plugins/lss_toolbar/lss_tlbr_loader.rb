@@ -17,6 +17,9 @@ require 'lss_toolbar/lss_toolbar.rb'
 #initializes '2 Faces Plus Path...' tool
 require 'lss_toolbar/lss_pathface.rb'
 
+#initializes 'Blend' tool
+require 'lss_toolbar/lss_blend.rb'
+
 #initializes 'Voxelate' tool
 require 'lss_toolbar/lss_voxelate.rb'
 

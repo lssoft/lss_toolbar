@@ -1,0 +1,154 @@
+<html>
+<head>
+<title>Blend</title>
+<meta http-equiv="Content-Type" content="text/html; charset=win-1251">
+<link href="lss_tool.css" rel="stylesheet" type="text/css">
+<script type="text/JavaScript" src="jsDraw2D/jsDraw2D.js"></script> 
+<script type="text/javascript" src="lss_common.js" charset="win-1251"></script>
+<script type="text/javascript" src="blend.js" charset="win-1251"></script>
+<script>
+window.dhx_globalImgPath = "dhtmlxSlider/codebase/imgs/";
+</script>
+<script  src="dhtmlxSlider/codebase/dhtmlxcommon.js"></script>
+<script  src="dhtmlxSlider/codebase/dhtmlxslider.js"></script>
+<script  src="dhtmlxSlider/codebase/ext/dhtmlxslider_start.js"></script>
+<link rel="STYLESHEET" type="text/css" href="dhtmlxSlider/codebase/dhtmlxslider.css">    
+</head>
+<body class="body" onload="obtain_defaults()" onfocus="callRuby('get_settings')" onkeyup="key_up_body(event)">
+	<table id="settings_table" class="page_tbl">
+		<tbody id="blend_tool_settings">
+			<tr>
+				<td class="info_img_cell">
+					<img src="images/buttons/blend_24.gif">
+				</td>
+				<td class="tbl_hdr">
+					&nbsp;Blend
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell" id="first_ent_cell">
+					<div id="first_ent_canvas" style="overflow:hidden;position:relative;width:32px;height:32px;" title="Picked ent thumbnail"></div>
+				</td>
+				<td class="setting_cell">
+					<table width=100%>
+						<tr>
+							<td>
+								First entity
+							</td>
+							<td align="right" valign="top"><input type="button" onclick="pick_first_ent()" value="Pick >>"/><td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell" id="first_ent_mat_cell">
+					<div id="first_ent_mat_canvas" style="overflow:hidden;position:relative;width:32px;height:32px;" title="Materials colors of picked ent"></div>
+				</td>
+				<td class="setting_cell">
+					<img src="images/info_imgs/blend/reverse_ent.gif" class="speed_btn" onclick="click_speed(this)" onmouseover="speed_btn_over(this)" onmouseout="speed_btn_out(this)" id="reverse_first" alt="Reverse first entity">
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell" id="second_ent_cell">
+					<div id="second_ent_canvas" style="overflow:hidden;position:relative;width:32px;height:32px;" title="Picked ent thumbnail"></div>
+				</td>
+				<td class="setting_cell">
+					<table width=100%>
+						<tr>
+							<td>
+								Second entity
+							</td>
+							<td align="right" valign="top"><input type="button" onclick="pick_second_ent()" value="Pick >>"/><td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell" id="second_ent_mat_cell">
+					<div id="second_ent_mat_canvas" style="overflow:hidden;position:relative;width:32px;height:32px;" title="Materials colors of picked entity"></div>
+				</td>
+				<td class="setting_cell">
+					<img src="images/info_imgs/blend/reverse_ent.gif" class="speed_btn" onclick="click_speed(this)" onmouseover="speed_btn_over(this)" onmouseout="speed_btn_out(this)" id="reverse_second" alt="Reverse second entity">
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+		</tbody>
+		<tbody id="blend_tool_settings">
+			<tr>
+				<td class="info_img_cell">
+					&nbsp;
+				</td>
+				<td class="tbl_hdr">
+					&nbsp;Tool Settings
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					Steps&nbsp;count&nbsp;<input type="text" id="steps_cnt" value="10" size="6" onchange="send_setting(this)" onkeydown="key_dwn(this)">
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					Result options<br>
+					<span id="result_type_chk_grp">
+					<img src="images/info_imgs/blend/blend_steps.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="generate_steps" alt="Generate intermediate steps">
+					<img src="images/info_imgs/blend/blend_surf.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="generate_surf" alt="Generate surface">
+					<img src="images/info_imgs/blend/blend_tracks.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="generate_tracks" alt="Generate vertices tracks">
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					Capping options<br>
+					<span id="cap_chk_grp">
+					<img src="images/info_imgs/blend/blend_cap_start.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="cap_start" alt="Cap start">
+					<img src="images/info_imgs/blend/blend_cap_end.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="cap_end" alt="Cap end">
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					Soft/smooth type<br>
+					<span id="surf_opts_radio_grp">
+					<input type="hidden" id="soft_smooth_surf">
+					<img src="images/info_imgs/blend/blend_no_soft_smooth.gif" class="radio_selected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="no_soft_smooth" alt="Nor soft nither smooth">
+					<img src="images/info_imgs/blend/blend_soft.gif" class="radio_unselected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="soft" alt="Soft">
+					<img src="images/info_imgs/blend/blend_smooth.gif" class="radio_unselected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="smooth" alt="Smooth">
+					<img src="images/info_imgs/blend/blend_soft_smooth.gif" class="radio_unselected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="soft_smooth" alt="Soft and smooth">
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					<br>
+					<div title="Affects preview only">Transparency level</div><br>
+					<input type="hidden" id="transp_level" width="3">
+					<div id="slider_div"></div>
+					<br>
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+		</tbody>
+	</table>
+	<table id="bottom_tbl" class="bottom_tbl">
+		<tr>
+			<td align="left">
+				
+			</td>
+			<td align="right">
+				<input type="button" onclick="reset_tool()" value="Reset"/>
+				<input type="button" onclick="apply_settings()" value="Apply" />
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

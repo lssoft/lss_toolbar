@@ -1,0 +1,85 @@
+<html>
+<head>
+<title>Make Recursive...</title>
+<meta http-equiv="Content-Type" content="text/html; charset=win-1251">
+<link href="lss_tool.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="lss_common.js" charset="win-1251"></script>
+<script type="text/javascript" src="recursive.js" charset="win-1251"></script>
+<script>
+</script>
+</head>
+<body class="body" onload="obtain_defaults()" onkeyup="key_up_body(event)">
+	<table id="settings_table" class="page_tbl">
+		<tbody id="recursive_tool_settings">
+			<tr>
+				<td class="info_img_cell">
+					<img src="images/buttons/recursive_24.gif">
+				</td>
+				<td class="tbl_hdr">
+					&nbsp;Make Recursive...
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell">
+					<img src="images/info_imgs/green_chkd.gif" style="display:none" id="group_is_picked">
+				</td>
+				<td class="setting_cell">
+					<table width=100%>
+						<tr>
+							<td title="Group to make recursive">
+								Group
+							</td>
+							<td align="right" valign="top"><input type="button" onclick="pick_group()" value="Pick >>"/><td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+		</tbody>
+		<tbody id="recursive_tool_settings">
+			<tr>
+				<td class="info_img_cell">
+					&nbsp;
+				</td>
+				<td class="tbl_hdr">
+					&nbsp;Tool Settings
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					<br>
+					<table>
+						<tr>
+							<td>Recursive&nbsp;depth</td><td><input type="text" id="recursive_depth" value="10" size="6" onchange="send_setting(this)" onkeydown="key_dwn(this)"></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					More Options<br>
+					<img src="images/info_imgs/recursive/show_recursive.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="show_recursive" alt="Show making recursive process">
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+		</tbody>
+	</table>
+	<table id="bottom_tbl" class="bottom_tbl">
+		<tr>
+			<td align="left">
+				
+			</td>
+			<td align="right">
+				<input type="button" onclick="reset_tool()" value="Reset"/>
+				<input type="button" onclick="apply_settings()" value="Apply" />
+			</td>
+		</tr>
+	</table>
+</body>
+</html>
