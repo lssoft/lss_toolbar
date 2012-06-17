@@ -199,6 +199,14 @@ class Lss_Properties_Dialog
 				setting_val=action_name.split(",")[3]
 				setting_dict=@selection[0].attribute_dictionaries[setting_dict_name]
 				setting_dict[setting_name]=setting_val
+				if @selection[0].typename=="Edge"
+					curve=@selection[0].curve
+					if curve
+						curve.edges.each{|edg|
+							edg.set_attribute(setting_dict_name, setting_name, setting_val)
+						}
+					end
+				end
 				model=Sketchup.active_model
 				attrdicts = model.attribute_dictionaries
 				lss_toolbar_objs_dict = attrdicts["lss_toolbar_objects"]

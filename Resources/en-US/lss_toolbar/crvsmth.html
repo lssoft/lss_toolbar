@@ -1,0 +1,102 @@
+<html>
+<head>
+<title>Recursively Smoothed Curve</title>
+<meta http-equiv="Content-Type" content="text/html; charset=win-1251">
+<link href="lss_tool.css" rel="stylesheet" type="text/css">
+<script type="text/JavaScript" src="jsDraw2D/jsDraw2D.js"></script> 
+<script type="text/javascript" src="lss_common.js" charset="win-1251"></script>
+<script type="text/javascript" src="crvsmth.js" charset="win-1251"></script>
+<script>
+window.dhx_globalImgPath = "dhtmlxSlider/codebase/imgs/";
+</script>
+<script  src="dhtmlxSlider/codebase/dhtmlxcommon.js"></script>
+<script  src="dhtmlxSlider/codebase/dhtmlxslider.js"></script>
+<script  src="dhtmlxSlider/codebase/ext/dhtmlxslider_start.js"></script>
+<link rel="STYLESHEET" type="text/css" href="dhtmlxSlider/codebase/dhtmlxslider.css">    
+</head>
+<body class="body" onload="obtain_defaults()" onfocus="callRuby('get_settings')" onkeyup="key_up_body(event)">
+	<table id="settings_table" class="page_tbl">
+		<tbody id="crvsmth_tool_settings">
+			<tr>
+				<td class="info_img_cell">
+					<img src="images/buttons/crvsmth_24.gif">
+				</td>
+				<td class="tbl_hdr">
+					&nbsp;Smoothed Curve
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell" id="curve_cell">
+					<div id="curve_canvas" style="overflow:hidden;position:relative;width:32px;height:32px;" title="Picked curve thumbnail"></div>
+				</td>
+				<td class="setting_cell">
+					<table width=100%>
+						<tr>
+							<td>
+								Existing curve
+							</td>
+							<td align="right" valign="top"><input type="button" onclick="pick_curve()" size="8" value="Pick >>"/><td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell" id="first_face_cell">
+					&nbsp;
+				</td>
+				<td class="setting_cell">
+					<table width=100%>
+						<tr>
+							<td>
+								New curve
+							</td>
+							<td align="right" valign="top"><input type="button" onclick="draw_init_curve()" size="8" value="Draw... "/><td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+		</tbody>
+		<tbody id="crvsmth_tool_settings">
+			<tr>
+				<td class="info_img_cell">
+					&nbsp;
+				</td>
+				<td class="tbl_hdr">
+					&nbsp;Tool Settings
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					<table>
+						<tr>
+							<td>Iterations&nbsp;count</td><td><input type="text" id="iterations_cnt" value="2" size="6" onchange="send_setting(this)" onkeydown="key_dwn(this)"></td>
+						</tr>
+					</table>
+					<span id="result_type_chk_grp">
+					<img src="images/info_imgs/crvsmth/leave_init.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="leave_initial" alt="Leave/Draw the initial curve">
+					<img src="images/info_imgs/crvsmth/expl_lines.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="show_expl_lines" alt="Show explanation lines">
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+		</tbody>
+	</table>
+	<table id="bottom_tbl" class="bottom_tbl">
+		<tr>
+			<td align="left">
+				
+			</td>
+			<td align="right">
+				<input type="button" onclick="reset_tool()" value="Reset"/>
+				<input type="button" onclick="apply_settings()" value="Apply" />
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

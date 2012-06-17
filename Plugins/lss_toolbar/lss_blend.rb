@@ -873,13 +873,41 @@ class Lss_Blend_Tool
 		# Searching for 2 entities
 		ent1=nil
 		ent2=nil
+		
+		# Searching for first entity
 		@selection.each{|ent|
-			ent1=ent if ent.typename == "Face"
-		}
-		@selection.each{|ent|
-			ent2=ent if ent.typename == "Face" and ent!=ent1
+			if ent.typename == "Edge"
+				curve=ent.curve
+				if curve
+					ent1=curve
+				else
+					ent1=ent
+				end
+				break
+			end
+			if ent.typename == "Face" or ent.typename == "ConstructionPoint"
+				ent1=ent
+				break
+			end
 		}
 		
+		@selection.each{|ent|
+			if ent.typename == "Edge" and ent!=ent1
+				curve=ent.curve
+				if curve
+					ent2=curve if curve!=ent1
+				else
+					ent2=ent
+				end
+				break if ent2
+			end
+			if (ent.typename == "Face" or ent.typename == "ConstructionPoint") and ent!=ent1
+				ent2=ent
+				break
+			end
+		}
+		@first_ent=ent1
+		@second_ent=ent2
 		@selection.clear
 	end
 	  

@@ -345,7 +345,7 @@ class Lss_Recursive_Entity
 		@root_group.set_attribute(@lss_recursive_dict, "recursive_depth", @recursive_depth)
 		@root_group.set_attribute(@lss_recursive_dict, "show_recursive", @show_recursive)
 		
-		# Store information in the current active model, that indicates 'LSS Voxelate Object' presence in it.
+		# Store information in the current active model, that indicates 'LSS Recursive Object' presence in it.
 		# It is necessary for manual and automatic refreshing of this object after its part(s) chanching.
 		@model.set_attribute("lss_toolbar_objects", "lss_recursive", "present")
 		# It is a bit dangerous approach, but for now looks like it's worth of it
@@ -445,7 +445,7 @@ class Lss_Recursive_Refresh
 		@entities.erase_entities(ents2erase)
 	end
 	
-end #class Lss_Voxelate_Refresh
+end #class Lss_Recursive_Refresh
 
 class Lss_Recursive_Tool
 	def initialize
@@ -511,7 +511,7 @@ class Lss_Recursive_Tool
 				if @recursive_entity
 					@recursive_entity.generate_results
 				else
-					self.make_voxelate_entity if @root_group
+					self.make_recursive_entity if @root_group
 					if @recursive_entity
 						@recursive_entity.generate_results
 					else

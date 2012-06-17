@@ -20,6 +20,9 @@ require 'lss_toolbar/lss_pathface.rb'
 #initializes 'Blend' tool
 require 'lss_toolbar/lss_blend.rb'
 
+#initializes 'Recursively Smoothed Curve' tool (14-Jun-12)
+require 'lss_toolbar/lss_crvsmth.rb'
+
 #initializes 'Voxelate' tool
 require 'lss_toolbar/lss_voxelate.rb'
 
