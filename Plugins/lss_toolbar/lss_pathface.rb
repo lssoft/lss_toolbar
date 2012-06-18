@@ -576,33 +576,37 @@ class Lss_Pathface_Refresh
 				}
 				if process_grp
 					processed_objs_names<<lss_pathface_attr_dict_name
-					self.assemble_pathface_obj(lss_pathface_attr_dict_name)
-					if @first_face and @second_face and @path_curve
-						self.clear_previous_results(lss_pathface_attr_dict_name)
-						pathface_entity=Lss_PathFace_Entity.new(@first_face, @second_face, @path_curve)
-						pathface_entity.generate_faces=@first_face.get_attribute(lss_pathface_attr_dict_name, "generate_faces")
-						pathface_entity.generate_surf=@first_face.get_attribute(lss_pathface_attr_dict_name, "generate_surf")
-						pathface_entity.generate_tracks=@first_face.get_attribute(lss_pathface_attr_dict_name, "generate_tracks")
-						pathface_entity.align2path=@first_face.get_attribute(lss_pathface_attr_dict_name, "align2path")
-						pathface_entity.center2path=@first_face.get_attribute(lss_pathface_attr_dict_name, "center2path")
-						pathface_entity.cap_start=@first_face.get_attribute(lss_pathface_attr_dict_name, "cap_start")
-						pathface_entity.cap_end=@first_face.get_attribute(lss_pathface_attr_dict_name, "cap_end")
-						pathface_entity.soft_surf=@first_face.get_attribute(lss_pathface_attr_dict_name, "soft_surf")
-						pathface_entity.smooth_surf=@first_face.get_attribute(lss_pathface_attr_dict_name, "smooth_surf")
-						pathface_entity.calculate_result_faces
-						pathface_entity.generate_results
-						
-						# Clear from previous 'pathface object' identification, since new one was created  after 'pathface_entity.generate_results'
-						@first_face.attribute_dictionaries.delete(lss_pathface_attr_dict_name)
-						@second_face.attribute_dictionaries.delete(lss_pathface_attr_dict_name)
-						@path_curve.edges.each{|edg|
-							edg.attribute_dictionaries.delete(lss_pathface_attr_dict_name)
-						}
-					else
-						puts("")
-					end
+					self.refresh_one_obj_dict(lss_pathface_attr_dict_name)
 				end
 			}
+		end
+	end
+	
+	def refresh_one_obj_dict(lss_pathface_attr_dict_name)
+		self.assemble_pathface_obj(lss_pathface_attr_dict_name)
+		if @first_face and @second_face and @path_curve
+			self.clear_previous_results(lss_pathface_attr_dict_name)
+			pathface_entity=Lss_PathFace_Entity.new(@first_face, @second_face, @path_curve)
+			pathface_entity.generate_faces=@first_face.get_attribute(lss_pathface_attr_dict_name, "generate_faces")
+			pathface_entity.generate_surf=@first_face.get_attribute(lss_pathface_attr_dict_name, "generate_surf")
+			pathface_entity.generate_tracks=@first_face.get_attribute(lss_pathface_attr_dict_name, "generate_tracks")
+			pathface_entity.align2path=@first_face.get_attribute(lss_pathface_attr_dict_name, "align2path")
+			pathface_entity.center2path=@first_face.get_attribute(lss_pathface_attr_dict_name, "center2path")
+			pathface_entity.cap_start=@first_face.get_attribute(lss_pathface_attr_dict_name, "cap_start")
+			pathface_entity.cap_end=@first_face.get_attribute(lss_pathface_attr_dict_name, "cap_end")
+			pathface_entity.soft_surf=@first_face.get_attribute(lss_pathface_attr_dict_name, "soft_surf")
+			pathface_entity.smooth_surf=@first_face.get_attribute(lss_pathface_attr_dict_name, "smooth_surf")
+			pathface_entity.calculate_result_faces
+			pathface_entity.generate_results
+			
+			# Clear from previous 'pathface object' identification, since new one was created  after 'pathface_entity.generate_results'
+			@first_face.attribute_dictionaries.delete(lss_pathface_attr_dict_name)
+			@second_face.attribute_dictionaries.delete(lss_pathface_attr_dict_name)
+			@path_curve.edges.each{|edg|
+				edg.attribute_dictionaries.delete(lss_pathface_attr_dict_name)
+			}
+		else
+			puts("")
 		end
 	end
 	
@@ -682,7 +686,7 @@ class Lss_PathFace_Tool
 		@result_faces=nil
 	end
 	
-	def pathface_read_defaults
+	def read_defaults
 		@generate_faces=Sketchup.read_default("LSS_Pathface", "generate_faces", "true")
 		@generate_surf=Sketchup.read_default("LSS_Pathface", "generate_surf", "false")
 		@generate_tracks=Sketchup.read_default("LSS_Pathface", "generate_tracks", "false")
@@ -730,7 +734,7 @@ class Lss_PathFace_Tool
 	
 	def create_web_dial
 		# Read defaults
-		self.pathface_read_defaults
+		self.read_defaults
 		
 		# Create the WebDialog instance
 		@pathface_dialog = UI::WebDialog.new($lsstoolbarStrings.GetString("2 Faces + Path"), true, "LSS Toolbar", 350, 400, 200, 200, true)
@@ -839,6 +843,13 @@ class Lss_PathFace_Tool
 				end
 				self.hash2settings
 				@highlight_col1.alpha=1.0-@transp_level/100.0
+			end
+			if action_name=="reset"
+				view=Sketchup.active_model.active_view
+				self.reset(view)
+				view.invalidate
+				lss_pathface_tool=Lss_PathFace_Tool.new
+				Sketchup.active_model.select_tool(lss_pathface_tool)
 			end
 		end
 		resource_dir = File.dirname(Sketchup.get_resource_path("lss_toolbar.strings"))
@@ -1349,6 +1360,11 @@ class Lss_PathFace_Tool
 		end
 		
 		@result_faces=nil
+		@result_surf_pts=nil
+		@result_tracks_pts=nil
+		
+		self.read_defaults
+		self.send_settings2dlg
 	end
 
 	def deactivate(view)

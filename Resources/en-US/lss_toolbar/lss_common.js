@@ -50,6 +50,9 @@ function obtain_defaults(){
 function reset_tool() {
 	actionName="reset"
 	callRuby(actionName);
+	if (typeof window.custom_reset == "function") { // Checks if custom_init exists
+		custom_reset(); // Calls a function within custom *.js file
+	}
 }
 
 function apply_settings() {

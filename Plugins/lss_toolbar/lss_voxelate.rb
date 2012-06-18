@@ -600,6 +600,13 @@ class Lss_Voxelate_Tool
 				end
 				self.hash2settings
 			end
+			if action_name=="reset"
+				view=Sketchup.active_model.active_view
+				self.reset(view)
+				view.invalidate
+				lss_voxelate_tool=Lss_Voxelate_Tool.new
+				Sketchup.active_model.select_tool(lss_voxelate_tool)
+			end
 		end
 		resource_dir = File.dirname(Sketchup.get_resource_path("lss_toolbar.strings"))
 		html_path = "#{resource_dir}/lss_toolbar/voxelate.html"
@@ -793,11 +800,6 @@ class Lss_Voxelate_Tool
 		# Entities section
 		@group2voxelate=nil
 		@voxel_inst=nil
-		# Settings section
-		@voxel_step_size=1.0
-		@voxel_type=nil
-		@fill_with_voxels="false"
-		@settings_hash=Hash.new
 		# Display section
 		@under_cur_invalid_bnds=nil
 		@grp_under_cur_bnds=nil
@@ -809,7 +811,10 @@ class Lss_Voxelate_Tool
 		#Results section
 		@voxelate_entity=nil
 		@voxel_centers=nil		# Array of voxel centers coordinates
-		@voxel_mats=nil		
+		@voxel_mats=nil	
+		# Settings section
+		self.read_defaults
+		self.send_settings2dlg
 	end
 
 	def deactivate(view)

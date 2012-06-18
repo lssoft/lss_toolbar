@@ -260,3 +260,16 @@ function custom_init() {
 		}
 	}
 }
+
+function custom_reset() {
+	div_canvas=document.getElementById("path_curve_canvas");
+	div_canvas.innerHTML="";
+	div_canvas=document.getElementById("second_face_canvas");
+	div_canvas.innerHTML="";
+	div_mat_canvas=document.getElementById("second_face_mat_canvas");
+	div_mat_canvas.innerHTML="";
+	div_canvas=document.getElementById("first_face_canvas");
+	div_canvas.innerHTML="";
+	div_mat_canvas=document.getElementById("first_face_mat_canvas");
+	div_mat_canvas.innerHTML="";
+}

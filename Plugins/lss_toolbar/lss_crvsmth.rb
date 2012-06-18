@@ -38,6 +38,7 @@ class Lss_Crvsmth_Entity
 	attr_accessor :iterations_cnt
 	attr_accessor :leave_initial
 	attr_accessor :show_expl_lines
+	attr_accessor :curve_closed
 	# Results
 	attr_accessor :result_points
 	attr_accessor :expl_points
@@ -45,6 +46,10 @@ class Lss_Crvsmth_Entity
 	# Crvsmth entity parts
 	attr_accessor :nodal_c_points
 	attr_accessor :result_curve
+	attr_accessor :first_adj_pt
+	attr_accessor :last_adj_pt
+	attr_accessor :first_adj_c_pt
+	attr_accessor :last_adj_c_pt
 	
 	def initialize
 		# Input Data
@@ -54,6 +59,7 @@ class Lss_Crvsmth_Entity
 		@iterations_cnt=2
 		@leave_initial="false"
 		@show_expl_lines="false"
+		@curve_closed=nil
 		# Results
 		@result_points=nil
 		@expl_points=nil
@@ -64,6 +70,8 @@ class Lss_Crvsmth_Entity
 		@init_curve=nil
 		@init_curve_group=nil
 		@expl_lines_group=nil
+		@first_adj_pt=nil
+		@last_adj_pt=nil
 		
 		@model=Sketchup.active_model
 		@entities=@model.active_entities
@@ -78,9 +86,9 @@ class Lss_Crvsmth_Entity
 					@nodal_points<<vrt.position
 				}
 				if @init_curve.vertices.first.position==@init_curve.vertices.last.position
-					@curve_closed=true
+					@curve_closed="true"
 				else
-					@curve_closed=false
+					@curve_closed="false"
 				end
 			end
 		end
@@ -89,14 +97,27 @@ class Lss_Crvsmth_Entity
 	
 	def pre_smooth
 		new_curve_pnts=Array.new
+		if @curve_closed=="true"
+			if @nodal_points.length>3
+				if @nodal_points.first!=@nodal_points.last
+					@nodal_points<<@nodal_points.first
+				end
+			end
+		else
+			if @nodal_points.length>4
+				if @nodal_points.first==@nodal_points.last
+					last_pt=@nodal_points.pop
+				end
+			end
+		end
 		if @nodal_points
 			return if @nodal_points.last==@nodal_points[@nodal_points.length-2] # This check is made to handle the situation when last entered point coincide with pre-last entered point
 			if @nodal_points.length>3
 				new_curve_pnts=Array.new(@nodal_points)
 				if @nodal_points.first==@nodal_points.last
-					@curve_closed=true
+					@curve_closed="true"
 				else
-					@curve_closed=false
+					@curve_closed="false"
 				end
 			else
 				return
@@ -132,7 +153,7 @@ class Lss_Crvsmth_Entity
 				new_curve_pnts.insert(ins_idx,mid_pt)
 				pnt_ind+=1
 			end
-			if @curve_closed
+			if @curve_closed=="true"
 				#first curve segment processing
 				ins_pt=curr_curve_pnts[1]
 				@pt1=curr_curve_pnts[-2]
@@ -183,17 +204,24 @@ class Lss_Crvsmth_Entity
 				ins_idx=new_curve_pnts.rindex(ins_pt) #rindex because it is necessary not to confuse first and last vert
 				new_curve_pnts.insert(ins_idx,mid_pt)
 			else #curve is not closed
+				if @first_adj_pt.nil?
+					first_adj_vec=curr_curve_pnts[1].vector_to(curr_curve_pnts[2])
+					@first_adj_pt=curr_curve_pnts[0].offset(first_adj_vec)
+				end
 				#first curve segment processing
 				ins_pt=curr_curve_pnts[1]
-				@pt1=curr_curve_pnts[2]
-				@pt2=curr_curve_pnts[1]
-				@pt3=curr_curve_pnts[0]
+				@pt1=@first_adj_pt
+				@pt2=curr_curve_pnts[0]
+				@pt3=curr_curve_pnts[1]
 				self.calc_mid_pt12
 				mid_pt1=@mid_pt12
 				if @show_expl_lines=="true"
 					self.make_explanations
 				end
-				self.calc_sim_pt
+				@pt1=curr_curve_pnts[2]
+				@pt2=curr_curve_pnts[1]
+				@pt3=curr_curve_pnts[0]
+				self.calc_mid_pt12
 				mid_pt2=@mid_pt12
 				mid_pt_x=(mid_pt1.x+mid_pt2.x)/2
 				mid_pt_y=(mid_pt1.y+mid_pt2.y)/2
@@ -204,18 +232,26 @@ class Lss_Crvsmth_Entity
 				end
 				ins_idx=new_curve_pnts.index(ins_pt)
 				new_curve_pnts.insert(ins_idx,mid_pt)
-
+				
 				#last curve segment processing
-				ins_pt=curr_curve_pnts[curr_pnts_cnt-1]
-				@pt1=curr_curve_pnts[curr_pnts_cnt-3]
-				@pt2=curr_curve_pnts[curr_pnts_cnt-2]
-				@pt3=curr_curve_pnts[curr_pnts_cnt-1]
+				if @last_adj_pt.nil?
+					last_adj_vec=curr_curve_pnts[curr_pnts_cnt-2].vector_to(curr_curve_pnts[curr_pnts_cnt-3])
+					@last_adj_pt=curr_curve_pnts[curr_pnts_cnt-1].offset(last_adj_vec)
+				end
+				pnt_ind=curr_pnts_cnt-3
+				ins_pt=curr_curve_pnts[pnt_ind+2]
+				@pt1=curr_curve_pnts[pnt_ind]
+				@pt2=curr_curve_pnts[pnt_ind+1]
+				@pt3=curr_curve_pnts[pnt_ind+2]
 				self.calc_mid_pt12
 				mid_pt1=@mid_pt12
 				if @show_expl_lines=="true"
 					self.make_explanations
 				end
-				self.calc_sim_pt
+				@pt1=@last_adj_pt
+				@pt2=curr_curve_pnts[pnt_ind+2]
+				@pt3=curr_curve_pnts[pnt_ind+1]
+				self.calc_mid_pt12
 				mid_pt2=@mid_pt12
 				mid_pt_x=(mid_pt1.x+mid_pt2.x)/2
 				mid_pt_y=(mid_pt1.y+mid_pt2.y)/2
@@ -308,11 +344,14 @@ class Lss_Crvsmth_Entity
 	
 	def generate_results
 		@lss_crvsmth_dict="lsscrvsmth" + "_" + Time.now.to_f.to_s
+		status = @model.start_operation($lsstoolbarStrings.GetString("LSS Recursively Smoothed Curve"))
 		self.generate_nodal_c_points
+		self.generate_adj_pts if @curve_closed=="false"
 		self.generate_init_curve if @leave_initial=="true" # Order matters: it is necessary to enclose existing initial curve in group prior smoothed curve creation
 		self.generate_curve
 		self.generate_expl_lines if @show_expl_lines=="true"
 		self.store_settings
+		status = @model.commit_operation
 	end
 	
 	def generate_nodal_c_points
@@ -321,6 +360,13 @@ class Lss_Crvsmth_Entity
 			nodal_c_pt=@entities.add_cpoint(pt)
 			@nodal_c_points<<nodal_c_pt
 		}
+	end
+	
+	def generate_adj_pts
+		@first_adj_c_pt=@entities.add_cpoint(@first_adj_pt)
+		@last_adj_c_pt=@entities.add_cpoint(@last_adj_pt)
+		@first_adj_c_line=@entities.add_cline(@first_adj_pt, @nodal_points.first)
+		@last_adj_c_line=@entities.add_cline(@last_adj_pt, @nodal_points.last)
 	end
 	
 	def generate_init_curve
@@ -352,21 +398,28 @@ class Lss_Crvsmth_Entity
 	def store_settings
 		# Store key information in each part of 'crvsmth entity'
 		@result_curve.each{|edg|
-			edg.set_attribute(@lss_crvsmth_dict, "inst_type", "result_curve")
+			edg.set_attribute(@lss_crvsmth_dict, "entity_type", "result_curve")
 		}
 		@nodal_c_points.each_index{|ind|
 			c_pt=@nodal_c_points[ind]
-			c_pt.set_attribute(@lss_crvsmth_dict, "inst_type", "nodal_c_point")
+			c_pt.set_attribute(@lss_crvsmth_dict, "entity_type", "nodal_c_point")
 			c_pt.set_attribute(@lss_crvsmth_dict, "pt_ind", ind)
 		}
-		@init_curve_group.set_attribute(@lss_crvsmth_dict, "inst_type", "init_curve_group") if @init_curve_group
-		@expl_lines_group.set_attribute(@lss_crvsmth_dict, "inst_type", "expl_lines_group") if @expl_lines_group
+		if @curve_closed=="false"
+			@first_adj_c_pt.set_attribute(@lss_crvsmth_dict, "entity_type", "first_adj_c_pt")
+			@last_adj_c_pt.set_attribute(@lss_crvsmth_dict, "entity_type", "last_adj_c_pt")
+			@first_adj_c_line.set_attribute(@lss_crvsmth_dict, "entity_type", "first_adj_c_line")
+			@last_adj_c_line.set_attribute(@lss_crvsmth_dict, "entity_type", "last_adj_c_line")
+		end
+		@init_curve_group.set_attribute(@lss_crvsmth_dict, "entity_type", "init_curve_group") if @init_curve_group
+		@expl_lines_group.set_attribute(@lss_crvsmth_dict, "entity_type", "expl_lines_group") if @expl_lines_group
 		
 		# Store settings to the first edge of result curve
 		@result_curve.each{|edg|
 			edg.set_attribute(@lss_crvsmth_dict, "iterations_cnt", @iterations_cnt)
 			edg.set_attribute(@lss_crvsmth_dict, "leave_initial", @leave_initial)
 			edg.set_attribute(@lss_crvsmth_dict, "show_expl_lines", @show_expl_lines)
+			edg.set_attribute(@lss_crvsmth_dict, "curve_closed", @curve_closed)
 		}
 		
 		# Store information in the current active model, that indicates 'LSS Crvsmth Object' presence in it.
@@ -392,6 +445,7 @@ class Lss_Crvsmth_Refresh
 		}
 		lss_crvsmth_attr_dicts=Array.new
 		sel_c_pt_inds=Array.new
+		sel_adj_c_pt=Array.new
 		curve_selected=Array.new
 		set_of_obj.each{|ent|
 			if not(ent.deleted?)
@@ -403,6 +457,10 @@ class Lss_Crvsmth_Refresh
 								# It is necessary to remove c_points from selection, because they'll be erased after "clear_previous_results"
 								ind=ent.get_attribute(attr_dict.name, "pt_ind")
 								sel_c_pt_inds<<[ind,attr_dict.name]
+								ent_type=ent.get_attribute(attr_dict.name, "entity_type")
+								if ent_type=="first_adj_c_pt" or ent_type=="last_adj_c_pt"
+									sel_adj_c_pt<<[ent_type,attr_dict.name]
+								end
 								@selection.remove(ent)
 							end
 						}
@@ -439,10 +497,37 @@ class Lss_Crvsmth_Refresh
 							@crvsmth_entity.iterations_cnt=@iterations_cnt.to_i
 							@crvsmth_entity.leave_initial=@leave_initial
 							@crvsmth_entity.show_expl_lines=@show_expl_lines
+							@crvsmth_entity.first_adj_pt=@first_adj_pt
+							@crvsmth_entity.last_adj_pt=@last_adj_pt
+							@crvsmth_entity.curve_closed=@curve_closed
 						
 							@crvsmth_entity.perform_pre_smooth
 							self.clear_previous_results(lss_crvsmth_attr_dict_name)
 							@crvsmth_entity.generate_results
+							# Attach back other attributes, except erased lss_crvsmth_attr_dict_name
+							result_curve=@crvsmth_entity.result_curve
+							result_curve.each{|edg|
+								@res_crv_dicts_hash.each_key{|dict_name|
+									if dict_name!=lss_crvsmth_attr_dict_name
+										dict=@res_crv_dicts_hash[dict_name]
+										dict.each_key{|key|
+											edg.set_attribute(dict_name, key, dict[key])
+										}
+									end
+								}
+							}
+							if not @res_crv_dicts_hash.empty?
+								@res_crv_dicts_hash.each_key{|dict_name|
+									if dict_name.split("_")[0]=="lsspathface"
+										pathface_refresh=Lss_Pathface_Refresh.new
+										pathface_refresh.refresh_one_obj_dict(dict_name)
+									end
+									if dict_name.split("_")[0]=="lssblend"
+										blend_refresh=Lss_Blend_Refresh.new
+										blend_refresh.refresh_one_obj_dict(dict_name)
+									end
+								}
+							end
 							# Now it is necessary to add back into @selection new c_points
 							@nodal_c_points=@crvsmth_entity.nodal_c_points
 							new_dict_name=""
@@ -471,6 +556,19 @@ class Lss_Crvsmth_Refresh
 									@selection.add(result_curve)
 								end
 							}
+							# Add back first adjustment construction point and last one
+							sel_adj_c_pt.each{|ent_type_dict_name|
+								ent_type=ent_type_dict_name[0]
+								dict_name=ent_type_dict_name[1]
+								if ent_type=="first_adj_c_pt" and dict_name==lss_crvsmth_attr_dict_name
+									first_adj_c_pt=@crvsmth_entity.first_adj_c_pt
+									@selection.add(first_adj_c_pt)
+								end
+								if ent_type=="last_adj_c_pt" and dict_name==lss_crvsmth_attr_dict_name
+									last_adj_c_pt=@crvsmth_entity.last_adj_c_pt
+									@selection.add(last_adj_c_pt)
+								end
+							}
 						end
 					end
 				end
@@ -483,11 +581,15 @@ class Lss_Crvsmth_Refresh
 		@result_curve=nil
 		@init_curve_group=nil
 		@expl_lines_group=nil
+		@first_adj_c_pt=nil
+		@last_adj_c_pt=nil
+		@first_adj_c_line=nil
+		@last_adj_c_line=nil
 		@entities.each{|ent|
 			if ent.attribute_dictionaries.to_a.length>0
 				chk_obj_dict=ent.attribute_dictionaries[obj_name]
 				if chk_obj_dict
-					case chk_obj_dict["inst_type"]
+					case chk_obj_dict["entity_type"]
 						when "nodal_c_point"
 						@nodal_c_points<<ent
 						when "result_curve"
@@ -495,10 +597,30 @@ class Lss_Crvsmth_Refresh
 						@iterations_cnt=ent.get_attribute(obj_name, "iterations_cnt")
 						@leave_initial=ent.get_attribute(obj_name, "leave_initial")
 						@show_expl_lines=ent.get_attribute(obj_name, "show_expl_lines")
+						@curve_closed=ent.get_attribute(obj_name, "curve_closed")
+						@res_crv_attr_dicts=ent.attribute_dictionaries
+						@res_crv_dicts_hash=Hash.new
+						@res_crv_attr_dicts.each{|dict|
+							keys_vals=Hash.new
+							dict.each_key{|key|
+								keys_vals[key]=dict[key]
+							}
+							@res_crv_dicts_hash[dict.name] = keys_vals
+						}
 						when "init_curve_group"
 						@init_curve_group=ent
 						when "expl_lines_group"
 						@expl_lines_group=ent
+						when "first_adj_c_pt"
+						@first_adj_c_pt=ent
+						@first_adj_pt=ent.position
+						when "last_adj_c_pt"
+						@last_adj_c_pt=ent
+						@last_adj_pt=ent.position
+						when "first_adj_c_line"
+						@first_adj_c_line=ent
+						when "last_adj_c_line"
+						@last_adj_c_line=ent
 					end
 				end
 			end
@@ -514,6 +636,10 @@ class Lss_Crvsmth_Refresh
 		ents2erase=Array.new
 		ents2erase<<@init_curve_group if @init_curve_group
 		ents2erase<<@expl_lines_group if @expl_lines_group
+		ents2erase<<@first_adj_c_pt if @first_adj_c_pt
+		ents2erase<<@last_adj_c_pt if @last_adj_c_pt
+		ents2erase<<@first_adj_c_line if @first_adj_c_line
+		ents2erase<<@last_adj_c_line if @last_adj_c_line
 		@entities.erase_entities(ents2erase)
 		@entities.erase_entities(@result_curve.edges)
 		@entities.erase_entities(@nodal_c_points)
@@ -548,9 +674,8 @@ class Lss_Crvsmth_Tool
 		
 		# Draw section
 		@nodal_points=nil
-		
-		@last_time=Time.now
-		
+		@first_adj_pt=nil
+		@last_adj_pt=nil
 		@settings_hash=Hash.new
 	end
 	
@@ -594,6 +719,10 @@ class Lss_Crvsmth_Tool
 		@crvsmth_dialog.add_action_callback("get_data") do |web_dialog,action_name|
 			view=Sketchup.active_model.active_view
 			if action_name=="apply_settings"
+				if @pick_state=="draw_curve"
+					last_pt=@nodal_points.pop # Erase last point since it is located near 'Apply' button and that's why it's useless
+					self.make_crvsmth_entity
+				end
 				if @crvsmth_entity
 					@crvsmth_entity.generate_results
 					self.reset(view)
@@ -612,6 +741,7 @@ class Lss_Crvsmth_Tool
 				self.onSetCursor
 			end
 			if action_name=="draw_curve"
+				self.reset(view)
 				@nodal_points=Array.new
 				@pick_state="draw_curve"
 				self.onSetCursor
@@ -636,6 +766,13 @@ class Lss_Crvsmth_Tool
 					end
 				end
 				self.hash2settings
+			end
+			if action_name=="reset"
+				view=Sketchup.active_model.active_view
+				self.reset(view)
+				view.invalidate
+				lss_crvsmth_tool=Lss_Crvsmth_Tool.new
+				Sketchup.active_model.select_tool(lss_crvsmth_tool)
 			end
 		end
 		resource_dir = File.dirname(Sketchup.get_resource_path("lss_toolbar.strings"))
@@ -695,6 +832,8 @@ class Lss_Crvsmth_Tool
 		
 		@result_points=@crvsmth_entity.result_points
 		@expl_points=@crvsmth_entity.expl_points
+		@first_adj_pt=@crvsmth_entity.first_adj_pt
+		@last_adj_pt=@crvsmth_entity.last_adj_pt
 	end
 	
 	def selection_filter
@@ -778,10 +917,8 @@ class Lss_Crvsmth_Tool
 		if @result_bounds
 			if @result_bounds.length>0
 				bb=Geom::BoundingBox.new
-				@result_bounds.each{|bnd|
-					bnd.each{|pt|
-						bb.add(pt)
-					}
+				@result_bounds.each{|pt|
+					bb.add(pt)
 				}
 			else
 				bb = Sketchup.active_model.bounds
@@ -793,12 +930,54 @@ class Lss_Crvsmth_Tool
 	end
 	
 	def draw(view)
+		@result_bounds=Array.new
+		if @expl_points
+			if @expl_points.length>0
+				@expl_points.each{|pt|
+					@result_bounds<<pt
+				}
+			end
+		end
+		if @result_points
+			if @result_points.length>0
+				@result_points.each{|pt|
+					@result_bounds<<pt
+				}
+			end
+		end
+		if @nodal_points
+			if @nodal_points.length>0
+				@nodal_points.each{|pt|
+					@result_bounds<<pt
+				}
+			end
+		end
 		self.draw_result_curve(view) if @result_points
 		self.draw_invalid_bnds(view) if @under_cur_invalid_bnds
 		self.draw_curve_under_cur(view) if @curve_under_cur
 		self.draw_selected_curve(view) if @init_curve
 		self.draw_expl_lines(view) if @expl_points
 		self.draw_new_init_curve(view) if @nodal_points
+		self.draw_first_adj_pt(view) if @first_adj_pt and @nodal_points
+		self.draw_last_adj_pt(view) if @last_adj_pt and @nodal_points
+	end
+	
+	def draw_first_adj_pt(view)
+		view.line_width=2
+		view.draw_points(@first_adj_pt, 9, 1, "black")
+		status=view.drawing_color="silver"
+		view.line_stipple="-"
+		view.draw_line(@nodal_points.first, @first_adj_pt)
+		view.line_stipple=""
+	end
+	
+	def draw_last_adj_pt(view)
+		view.line_width=2
+		view.draw_points(@last_adj_pt, 9, 1, "black")
+		view.line_stipple="-"
+		status=view.drawing_color="silver"
+		view.draw_line(@nodal_points.last, @last_adj_pt)
+		view.line_stipple=""
 	end
 
 	def draw_new_init_curve(view)
@@ -918,9 +1097,6 @@ class Lss_Crvsmth_Tool
 		@pick_state=nil # Indicates cursor type while the tool is active
 		# Entities section
 		@init_curve=nil
-		# Settings
-		self.read_defaults
-		self.send_settings2dlg
 		# Display section
 		@under_cur_invalid_bnds=nil
 		@curve_under_cur=nil
@@ -930,8 +1106,12 @@ class Lss_Crvsmth_Tool
 		#Results section
 		@result_points=nil
 		@expl_points=nil
-		
 		@nodal_points=nil
+		@first_adj_pt=nil
+		@last_adj_pt=nil
+		# Settings
+		self.read_defaults
+		self.send_settings2dlg
 	end
 
 	def deactivate(view)
@@ -1086,6 +1266,9 @@ class Lss_Crvsmth_Tool
 				if @nodal_points.length>2
 					@nodal_points<<@nodal_points.first
 					self.make_crvsmth_entity
+					@crvsmth_entity.curve_closed="true"
+					@crvsmth_entity.nodal_points=@nodal_points
+					@crvsmth_entity.perform_pre_smooth
 					@crvsmth_entity.generate_results
 					self.reset(view)
 				else

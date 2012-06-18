@@ -79,26 +79,32 @@ class Lss_Blend_Entity
 		
 		# Store key information in each part of 'blend entity'
 		if @first_ent.typename=="Curve" or @first_ent.typename=="ArcCurve"
-			@first_ent.edges.first.set_attribute(@lss_blend_dict, "inst_type", "first_ent")
+			@first_ent.edges.each{|edg|
+				edg.set_attribute(@lss_blend_dict, "inst_type", "first_ent")
+			}
 		else
 			@first_ent.set_attribute(@lss_blend_dict, "inst_type", "first_ent")
 		end
 		if @second_ent.typename=="Curve" or @second_ent.typename=="ArcCurve"
-			@second_ent.edges.first.set_attribute(@lss_blend_dict, "inst_type", "second_ent")
+			@second_ent.edges.each{|edg|
+				edg.set_attribute(@lss_blend_dict, "inst_type", "second_ent")
+			}
 		else
 			@second_ent.set_attribute(@lss_blend_dict, "inst_type", "second_ent")
 		end
 
 		# Store settings to the first entity
 		if @first_ent.typename=="Curve" or @first_ent.typename=="ArcCurve"
-			@first_ent.edges.first.set_attribute(@lss_blend_dict, "steps_cnt", @steps_cnt)
-			@first_ent.edges.first.set_attribute(@lss_blend_dict, "generate_steps", @generate_steps)
-			@first_ent.edges.first.set_attribute(@lss_blend_dict, "generate_surf", @generate_surf)
-			@first_ent.edges.first.set_attribute(@lss_blend_dict, "generate_tracks", @generate_tracks)
-			@first_ent.edges.first.set_attribute(@lss_blend_dict, "cap_start", @cap_start)
-			@first_ent.edges.first.set_attribute(@lss_blend_dict, "cap_end", @cap_end)
-			@first_ent.edges.first.set_attribute(@lss_blend_dict, "soft_surf", @soft_surf)
-			@first_ent.edges.first.set_attribute(@lss_blend_dict, "smooth_surf", @smooth_surf)
+			@first_ent.edges.each{|edg|
+				edg.set_attribute(@lss_blend_dict, "steps_cnt", @steps_cnt)
+				edg.set_attribute(@lss_blend_dict, "generate_steps", @generate_steps)
+				edg.set_attribute(@lss_blend_dict, "generate_surf", @generate_surf)
+				edg.set_attribute(@lss_blend_dict, "generate_tracks", @generate_tracks)
+				edg.set_attribute(@lss_blend_dict, "cap_start", @cap_start)
+				edg.set_attribute(@lss_blend_dict, "cap_end", @cap_end)
+				edg.set_attribute(@lss_blend_dict, "soft_surf", @soft_surf)
+				edg.set_attribute(@lss_blend_dict, "smooth_surf", @smooth_surf)
+			}
 		else
 			@first_ent.set_attribute(@lss_blend_dict, "steps_cnt", @steps_cnt)
 			@first_ent.set_attribute(@lss_blend_dict, "generate_steps", @generate_steps)
@@ -299,6 +305,17 @@ class Lss_Blend_Entity
 	def calculate_result_steps
 		self.estimate_max_vert_cnt
 		@result_step_pts=Array.new
+		@close_surf_seam=true
+		if @first_ent.typename=="Curve" or @first_ent.typename=="ArcCurve"
+			if @first_ent.vertices.first.position!=@first_ent.vertices.last.position
+				@close_surf_seam=false
+			end
+		end
+		if @second_ent.typename=="Curve" or @second_ent.typename=="ArcCurve"
+			if @second_ent.vertices.first.position!=@second_ent.vertices.last.position
+				@close_surf_seam=false
+			end
+		end
 		for step in 0..@steps_cnt.to_i-1
 			self.blend_one_step(step)
 		end
@@ -403,16 +420,18 @@ class Lss_Blend_Entity
 				ring2=@result_steps_pts[step]
 				surf_ring=Array.new
 				ring1.each_index{|ind|
-					pt1=ring1[ind-1]
-					pt2=ring1[ind]
-					pt3=ring2[ind-1]
-					triang1=[pt1, pt2, pt3]
-					pt1=ring1[ind]
-					pt2=ring2[ind]
-					pt3=ring2[ind-1]
-					triang2=[pt1, pt2, pt3]
-					surf_ring<<triang1
-					surf_ring<<triang2
+					if @close_surf_seam or ind>0
+						pt1=ring1[ind-1]
+						pt2=ring1[ind]
+						pt3=ring2[ind-1]
+						triang1=[pt1, pt2, pt3]
+						pt1=ring1[ind]
+						pt2=ring2[ind]
+						pt3=ring2[ind-1]
+						triang2=[pt1, pt2, pt3]
+						surf_ring<<triang1
+						surf_ring<<triang2
+					end
 				}
 				@result_surf_pts<<surf_ring
 			end
@@ -500,46 +519,54 @@ class Lss_Blend_Refresh
 				}
 				if process_grp
 					processed_objs_names<<lssblnd_attr_dict_name
-					self.assemble_blend_obj(lssblnd_attr_dict_name) # Something strange... undefined local variable or method `lssblnd_attr_dict_name' for #<Lss_Blend_Refresh:0x7688da8> error rises
-					if @first_ent and @second_ent and @steps_cnt
-						self.clear_previous_results(lssblnd_attr_dict_name)
-						blend_entity=Lss_Blend_Entity.new(@first_ent, @second_ent, @steps_cnt)
-						if @first_ent.typename=="Curve" or @first_ent.typename=="ArcCurve"
-							blend_entity.generate_steps=@first_ent.edges.first.get_attribute(lssblnd_attr_dict_name, "generate_steps")
-							blend_entity.generate_surf=@first_ent.edges.first.get_attribute(lssblnd_attr_dict_name, "generate_surf")
-							blend_entity.generate_tracks=@first_ent.edges.first.get_attribute(lssblnd_attr_dict_name, "generate_tracks")
-							blend_entity.cap_start=@first_ent.edges.first.get_attribute(lssblnd_attr_dict_name, "cap_start")
-							blend_entity.cap_end=@first_ent.edges.first.get_attribute(lssblnd_attr_dict_name, "cap_end")
-							blend_entity.soft_surf=@first_ent.edges.first.get_attribute(lssblnd_attr_dict_name, "soft_surf")
-							blend_entity.smooth_surf=@first_ent.edges.first.get_attribute(lssblnd_attr_dict_name, "smooth_surf")
-						else
-							blend_entity.generate_steps=@first_ent.get_attribute(lssblnd_attr_dict_name, "generate_steps")
-							blend_entity.generate_surf=@first_ent.get_attribute(lssblnd_attr_dict_name, "generate_surf")
-							blend_entity.generate_tracks=@first_ent.get_attribute(lssblnd_attr_dict_name, "generate_tracks")
-							blend_entity.cap_start=@first_ent.get_attribute(lssblnd_attr_dict_name, "cap_start")
-							blend_entity.cap_end=@first_ent.get_attribute(lssblnd_attr_dict_name, "cap_end")
-							blend_entity.soft_surf=@first_ent.get_attribute(lssblnd_attr_dict_name, "soft_surf")
-							blend_entity.smooth_surf=@first_ent.get_attribute(lssblnd_attr_dict_name, "smooth_surf")
-						end
-						blend_entity.calculate_result_steps
-						blend_entity.generate_results
-						
-						# Clear from previous 'blend object' identification, since new one was created  after 'blend_entity.generate_results'
-						if @first_ent.typename=="Curve" or @first_ent.typename=="ArcCurve"
-							@first_ent.edges.first.attribute_dictionaries.delete(lssblnd_attr_dict_name)
-						else
-							@first_ent.attribute_dictionaries.delete(lssblnd_attr_dict_name)
-						end
-						if @second_ent.typename=="Curve" or @second_ent.typename=="ArcCurve"
-							@second_ent.edges.first.attribute_dictionaries.delete(lssblnd_attr_dict_name)
-						else
-							@second_ent.attribute_dictionaries.delete(lssblnd_attr_dict_name)
-						end
-					else
-						puts("")
-					end
+					self.refresh_one_obj_dict(lssblnd_attr_dict_name)
 				end
 			}
+		end
+	end
+	
+	def refresh_one_obj_dict(lssblnd_attr_dict_name)
+		self.assemble_blend_obj(lssblnd_attr_dict_name)
+		if @first_ent and @second_ent and @steps_cnt
+			self.clear_previous_results(lssblnd_attr_dict_name)
+			blend_entity=Lss_Blend_Entity.new(@first_ent, @second_ent, @steps_cnt)
+			if @first_ent.typename=="Curve" or @first_ent.typename=="ArcCurve"
+				blend_entity.generate_steps=@first_ent.edges.first.get_attribute(lssblnd_attr_dict_name, "generate_steps")
+				blend_entity.generate_surf=@first_ent.edges.first.get_attribute(lssblnd_attr_dict_name, "generate_surf")
+				blend_entity.generate_tracks=@first_ent.edges.first.get_attribute(lssblnd_attr_dict_name, "generate_tracks")
+				blend_entity.cap_start=@first_ent.edges.first.get_attribute(lssblnd_attr_dict_name, "cap_start")
+				blend_entity.cap_end=@first_ent.edges.first.get_attribute(lssblnd_attr_dict_name, "cap_end")
+				blend_entity.soft_surf=@first_ent.edges.first.get_attribute(lssblnd_attr_dict_name, "soft_surf")
+				blend_entity.smooth_surf=@first_ent.edges.first.get_attribute(lssblnd_attr_dict_name, "smooth_surf")
+			else
+				blend_entity.generate_steps=@first_ent.get_attribute(lssblnd_attr_dict_name, "generate_steps")
+				blend_entity.generate_surf=@first_ent.get_attribute(lssblnd_attr_dict_name, "generate_surf")
+				blend_entity.generate_tracks=@first_ent.get_attribute(lssblnd_attr_dict_name, "generate_tracks")
+				blend_entity.cap_start=@first_ent.get_attribute(lssblnd_attr_dict_name, "cap_start")
+				blend_entity.cap_end=@first_ent.get_attribute(lssblnd_attr_dict_name, "cap_end")
+				blend_entity.soft_surf=@first_ent.get_attribute(lssblnd_attr_dict_name, "soft_surf")
+				blend_entity.smooth_surf=@first_ent.get_attribute(lssblnd_attr_dict_name, "smooth_surf")
+			end
+			blend_entity.calculate_result_steps
+			blend_entity.generate_results
+			
+			# Clear from previous 'blend object' identification, since new one was created  after 'blend_entity.generate_results'
+			if @first_ent.typename=="Curve" or @first_ent.typename=="ArcCurve"
+				@first_ent.edges.each{|edg|
+					edg.attribute_dictionaries.delete(lssblnd_attr_dict_name)
+				}
+			else
+				@first_ent.attribute_dictionaries.delete(lssblnd_attr_dict_name)
+			end
+			if @second_ent.typename=="Curve" or @second_ent.typename=="ArcCurve"
+				@second_ent.edges.each{|edg|
+					edg.attribute_dictionaries.delete(lssblnd_attr_dict_name)
+				}
+			else
+				@second_ent.attribute_dictionaries.delete(lssblnd_attr_dict_name)
+			end
+		else
+			puts("")
 		end
 	end
 	
@@ -632,7 +659,7 @@ class Lss_Blend_Tool
 		@result_steps=nil
 	end
 	
-	def blend_read_defaults
+	def read_defaults
 		@steps_cnt=Sketchup.read_default("LSS_Blend", "steps_cnt", "10")
 		@generate_steps=Sketchup.read_default("LSS_Blend", "generate_steps", "true")
 		@generate_surf=Sketchup.read_default("LSS_Blend", "generate_surf", "false")
@@ -677,7 +704,7 @@ class Lss_Blend_Tool
 	
 	def create_web_dial
 		# Read defaults
-		self.blend_read_defaults
+		self.read_defaults
 		
 		# Create the WebDialog instance
 		@blend_dialog = UI::WebDialog.new($lsstoolbarStrings.GetString("Blend"), true, "LSS Toolbar", 350, 400, 200, 200, true)
@@ -790,6 +817,13 @@ class Lss_Blend_Tool
 				end
 				self.hash2settings
 				@highlight_col1.alpha=1.0-@transp_level/100.0
+			end
+			if action_name=="reset"
+				view=Sketchup.active_model.active_view
+				self.reset(view)
+				view.invalidate
+				lss_blend_tool=Lss_Blend_Tool.new
+				Sketchup.active_model.select_tool(lss_blend_tool)
 			end
 		end
 		resource_dir = File.dirname(Sketchup.get_resource_path("lss_toolbar.strings"))
@@ -1172,18 +1206,16 @@ class Lss_Blend_Tool
 		@first_ent_pts=Array.new
 		@second_ent=nil
 		@second_ent_pts=Array.new
-		
 		@ent_under_cur=nil
 		@under_cur_invalid_bnds=nil
-		
 		@blend_entity=nil
-		
 		if( view )
 			view.tooltip = nil
 			view.invalidate
 		end
-		
 		@result_steps=nil
+		self.read_defaults
+		self.send_settings2dlg
 	end
 
 	def deactivate(view)

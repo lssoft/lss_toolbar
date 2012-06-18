@@ -23,6 +23,7 @@ function pick_curve() {
 function draw_init_curve() {
 	actionName="draw_curve";
 	callRuby(actionName);
+	custom_reset();
 }
 
 function get_curve_vert(vert_str) {
@@ -74,4 +75,9 @@ function refresh_curve() {
 // It is an important function in all custom *.js file, since main 'lss_common.js' calls it from 'obtain_defaults' function
 function custom_init() {
 	
+}
+
+function custom_reset() {
+	div_canvas=document.getElementById("curve_canvas");
+	div_canvas.innerHTML="";
 }

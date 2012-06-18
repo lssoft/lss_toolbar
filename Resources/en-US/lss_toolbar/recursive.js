@@ -12,3 +12,8 @@ function root_group_picked() {
 function custom_init() {
 	
 }
+
+function custom_reset() {
+	var green_chkd_img=document.images.group_is_picked;
+	green_chkd_img.style.display="none";
+}

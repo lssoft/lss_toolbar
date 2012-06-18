@@ -544,6 +544,13 @@ class Lss_Recursive_Tool
 				end
 				self.hash2settings
 			end
+			if action_name=="reset"
+				view=Sketchup.active_model.active_view
+				self.reset(view)
+				view.invalidate
+				lss_recursive_tool=Lss_Recursive_Tool.new
+				Sketchup.active_model.select_tool(lss_recursive_tool)
+			end
 		end
 		resource_dir = File.dirname(Sketchup.get_resource_path("lss_toolbar.strings"))
 		html_path = "#{resource_dir}/lss_toolbar/recursive.html"
@@ -729,9 +736,6 @@ class Lss_Recursive_Tool
 		# Entities section
 		@root_group=nil
 		@nested_group=nil
-		# Settings section
-		@recursive_depth=10
-		@show_recursive="false"
 		# Display section
 		@under_cur_invalid_bnds=nil
 		@grp_under_cur_bnds=nil
@@ -741,6 +745,9 @@ class Lss_Recursive_Tool
 		#Results section
 		@recursive_entity=nil
 		@result_bounds=nil		# Array of result bounds
+		# Settings section
+		self.read_defaults
+		self.send_settings2dlg
 	end
 
 	def deactivate(view)
