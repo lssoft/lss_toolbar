@@ -930,6 +930,9 @@ class Lss_Crvsmth_Tool
 	end
 	
 	def draw(view)
+		if @ip.valid?
+			@ip.draw(view)
+		end
 		@result_bounds=Array.new
 		if @expl_points
 			if @expl_points.length>0

@@ -23,6 +23,9 @@ require 'lss_toolbar/lss_blend.rb'
 #initializes 'Recursively Smoothed Curve' tool (14-Jun-12)
 require 'lss_toolbar/lss_crvsmth.rb'
 
+#initializes 'Make 3D Mesh' tool (19-Jun-12)
+require 'lss_toolbar/lss_pnts2mesh.rb'
+
 #initializes 'Voxelate' tool
 require 'lss_toolbar/lss_voxelate.rb'
 

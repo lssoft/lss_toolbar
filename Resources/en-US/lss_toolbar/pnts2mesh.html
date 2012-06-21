@@ -1,0 +1,156 @@
+<html>
+<head>
+<title>Make 3D Mesh...</title>
+<meta http-equiv="Content-Type" content="text/html; charset=win-1251">
+<link href="lss_tool.css" rel="stylesheet" type="text/css">
+<script type="text/JavaScript" src="jsDraw2D/jsDraw2D.js"></script> 
+<script type="text/javascript" src="lss_common.js" charset="win-1251"></script>
+<script type="text/javascript" src="pnts2mesh.js" charset="win-1251"></script>
+<script>
+window.dhx_globalImgPath = "dhtmlxSlider/codebase/imgs/";
+</script>
+<script  src="dhtmlxSlider/codebase/dhtmlxcommon.js"></script>
+<script  src="dhtmlxSlider/codebase/dhtmlxslider.js"></script>
+<script  src="dhtmlxSlider/codebase/ext/dhtmlxslider_start.js"></script>
+<link rel="STYLESHEET" type="text/css" href="dhtmlxSlider/codebase/dhtmlxslider.css">    
+</head>
+<body class="body" onload="obtain_defaults()" onfocus="callRuby('get_settings')" onkeyup="key_up_body(event)">
+	<table id="settings_table" class="page_tbl">
+		<tbody id="pnts2mesh_tool_settings">
+			<tr>
+				<td class="info_img_cell">
+					<img src="images/buttons/pnts2mesh_24.gif">
+				</td>
+				<td class="tbl_hdr">
+					&nbsp;Make 3D Mesh...
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell" id="pnts_cell">
+					<div id="pnts_canvas" style="overflow:hidden;position:relative;width:32px;height:32px;" title="Picked points thumbnail"></div>
+				</td>
+				<td class="setting_cell">
+					<table width=100%>
+						<tr>
+							<td>
+								Nodal points
+							</td>
+							<td align="right" valign="top"><input type="button" onclick="point_pt()" size="8" value="Point ++"/><td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+		</tbody>
+		<tbody id="pnts2mesh_tool_settings">
+			<tr>
+				<td class="info_img_cell">
+					&nbsp;
+				</td>
+				<td class="tbl_hdr">
+					&nbsp;Tool Settings
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					Calculation mode<br>
+					<span id="calc_alg_grp">
+					<input type="hidden" id="calc_alg">
+					<img src="images/info_imgs/pnts2mesh/distance_alg.gif" class="radio_selected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="distance" alt="Calculate according to distance between nodal points">
+					<img src="images/info_imgs/pnts2mesh/average_alg.gif" class="radio_unselected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="average" alt="Make preliminary rough mesh, then smooth it by Z-levels averaging">
+					<img src="images/info_imgs/pnts2mesh/minimize_alg.gif" class="radio_unselected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="minimize" alt="Make preliminary rough mesh, then smooth it by minimizing cumulative mesh length">
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					<table width="100%">
+						<tr>
+							<td>X-steps&nbsp;count</td><td align="right"><input type="text" id="cells_x_cnt" value="10" size="6" onchange="send_setting(this)" onkeydown="key_dwn(this)"></td>
+						</tr>
+					</table>
+					<table width="100%">
+						<tr>
+							<td>Y-steps&nbsp;count</td><td align="right"><input type="text" id="cells_y_cnt" value="10" size="6" onchange="send_setting(this)" onkeydown="key_dwn(this)"></td>
+						</tr>
+					</table>
+					<table width="100%">
+						<tr>
+							<td>Power</td><td align="right"><input type="text" id="power" value="3" size="6" onchange="send_setting(this)" onkeydown="key_dwn(this)"></td>
+						</tr>
+					</table>
+					<table width="100%">
+						<tr>
+							<td>Averaging&nbsp;times</td><td align="right"><input type="text" id="average_times" value="5" size="6" onchange="send_setting(this)" onkeydown="key_dwn(this)"></td>
+						</tr>
+					</table>
+					<table width="100%">
+						<tr>
+							<td>Minimizing&nbsp;times</td><td align="right"><input type="text" id="minimize_times" value="5" size="6" onchange="send_setting(this)" onkeydown="key_dwn(this)" ></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					Soft/smooth type<br>
+					<span id="surf_opts_radio_grp">
+					<input type="hidden" id="soft_smooth_surf">
+					<img src="images/info_imgs/no_soft_smooth.gif" class="radio_selected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="no_soft_smooth" alt="Nor soft nither smooth">
+					<img src="images/info_imgs/soft.gif" class="radio_unselected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="soft" alt="Soft">
+					<img src="images/info_imgs/smooth.gif" class="radio_unselected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="smooth" alt="Smooth">
+					<img src="images/info_imgs/soft_smooth.gif" class="radio_unselected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="soft_smooth" alt="Soft and smooth">
+					</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					Horizontals<br>
+					<img src="images/info_imgs/pnts2mesh/draw_horizontals.gif" class="btn_unchecked" onclick="click_chk(this)" onmouseover="btn_over(this)" onmouseout="btn_out(this)" id="draw_horizontals" alt="Draw horizontals">
+					&nbsp;
+					<span id="horiz_orgn_radio_grp">
+					<input type="hidden" id="horizontals_origin">
+					<img src="images/info_imgs/pnts2mesh/world_orgn.gif" class="radio_selected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="world" alt="Model 'world' origin">
+					<img src="images/info_imgs/pnts2mesh/local_orgn.gif" class="radio_unselected" onmouseover="radio_over(this)" onmouseout="radio_out(this)" onclick="radio_click(this)" id="local" alt="Result surface local origin">
+					</span>
+					<table width="100%">
+						<tr>
+							<td>Horizontals&nbsp;step</td><td align="right"><input type="text" id="horizontals_step" value="10" size="6" onchange="send_setting(this)" onkeydown="key_dwn(this)"></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell"></td>
+				<td class="setting_cell">
+					<br>
+					<div title="Affects preview only">Transparency level</div><br>
+					<input type="hidden" id="transp_level" width="3">
+					<div id="slider_div"></div>
+					<br>
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+		</tbody>
+	</table>
+	<table id="bottom_tbl" class="bottom_tbl">
+		<tr>
+			<td align="left">
+				
+			</td>
+			<td align="right">
+				<input type="button" onclick="reset_tool()" value="Reset"/>
+				<input type="button" onclick="apply_settings()" value="Apply" />
+			</td>
+		</tr>
+	</table>
+</body>
+</html>
