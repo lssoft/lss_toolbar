@@ -51,6 +51,9 @@ class Lss_Pnts2mesh_Entity
 	# Pnts2mesh entity parts
 	attr_accessor :nodal_c_points
 	attr_accessor :result_surface
+	# Timer
+	attr_accessor :finish_timer
+	attr_accessor :calculation_complete
 	
 	def initialize
 		# Input Data
@@ -74,6 +77,10 @@ class Lss_Pnts2mesh_Entity
 		@nodal_c_points=nil
 		@result_surface=nil
 		@horizontals_group=nil
+		# Timer
+		@finish_timer=false
+		@calculation_complete=false
+		
 		@model=Sketchup.active_model
 		@entities=@model.active_entities
 	end
@@ -103,6 +110,9 @@ class Lss_Pnts2mesh_Entity
 		@nodal_points.each{|pt|
 			bb.add(pt)
 		}
+		@cell_x_size=1; @cell_y_size=1
+		@cell_x_size=bb.width/@cells_x_cnt.to_f if @cells_x_cnt>0
+		@cell_y_size=bb.height/@cells_y_cnt.to_f if @cells_y_cnt>0
 		orig_pt=bb.min
 		for x in 0..@cells_x_cnt-1
 			for y in 0..@cells_y_cnt-1
@@ -117,10 +127,15 @@ class Lss_Pnts2mesh_Entity
 	end
 	
 	def pre_calc_dist
-		@result_surface_points.each{|pt|
+		prgr_bar=Lss_Toolbar_Progr_Bar.new(@result_surface_points.length,"|","_",2)
+		@result_surface_points.each_index{|ind|
+			prgr_bar.update(ind)
+			Sketchup.status_text = "#{$lsstoolbarStrings.GetString("Calculating Z-levels:")} #{prgr_bar.progr_string}"
+			pt=@result_surface_points[ind]
 			z=self.calc_hyp_r_pwr(pt)
 			pt.z=z if z
 		}
+		Sketchup.status_text = ""
 	end
 	
 	def calc_hyp_r_pwr(meshpt)
@@ -150,15 +165,120 @@ class Lss_Pnts2mesh_Entity
 			deltazeval = deltazeval + deltaz * ((hyprsum - 1 / rn) / hyprsum)
 		}
 		z = zaverage-deltazeval
-		#~ meshpt.z = z
 	end
 	
 	def pre_calc_average
-		
+		self.make_terraces
+		@finish_timer=false
+		@calculation_complete=false
+		times=@average_times.to_i
+		avg_timer_id=UI.start_timer(0.1,true) {
+			self.average_one_step
+			self.pre_calc_horizontals if @draw_horizontals=="true"
+			view=Sketchup.active_model.active_view
+			view.invalidate
+			times-=1
+			if times==0 or @finish_timer
+				self.pre_calc_horizontals if @draw_horizontals=="true"
+				avg_timer_id=UI.stop_timer(avg_timer_id)
+				@calculation_complete=true
+			end
+		}
+	end
+	
+	def average_one_step
+		for x in 0..@cells_x_cnt-1
+			for y in 0..@cells_y_cnt-1
+				ind0=x*(@cells_y_cnt)+y
+				
+				ind1=x*(@cells_y_cnt)+y+1
+				ind2=x*(@cells_y_cnt)+y-1
+				ind3=(x+1)*(@cells_y_cnt)+y
+				ind4=(x-1)*(@cells_y_cnt)+y
+				ind_arr=[ind1, ind2, ind3, ind4]
+				z=0
+				cnt=0
+				r=0
+				pt=@result_surface_points[ind0]
+				ngb_arr=Array.new
+				ind_arr.each{|ind|
+					if ind>=0 and ind<@result_surface_points.length
+						ngb_arr<<@result_surface_points[ind]
+					end
+				}
+				@nodal_points.each{|nodal_pt|
+					r=(Math.sqrt((pt.x - nodal_pt.x) ** 2 + (pt.y - nodal_pt.y) ** 2))
+					if r==0
+						z=nodal_pt.z
+						break
+					end
+					x_dist=(pt.x - nodal_pt.x).abs
+					y_dist=(pt.y - nodal_pt.y).abs
+					if x_dist<@cell_x_size and y_dist<@cell_y_size
+						z+=nodal_pt.z
+						cnt+=1
+					end
+				}
+				if cnt>0
+					z=z/cnt.to_f
+				else
+					if r>0
+						ngb_arr.each{|ngb|
+							z+=ngb.z
+						}
+						z=z/ngb_arr.length.to_f
+					end
+				end
+				@result_surface_points[ind0]=Geom::Point3d.new(pt.x, pt.y, z)
+			end
+		end
 	end
 	
 	def pre_calc_minimize
 		
+	end
+	
+	def make_terraces
+		prgr_bar=Lss_Toolbar_Progr_Bar.new(@result_surface_points.length,"|","_",2)
+		@result_surface_points.each_index{|ind|
+			prgr_bar.update(ind)
+			Sketchup.status_text = "#{$lsstoolbarStrings.GetString("Preprocessing points:")} #{prgr_bar.progr_string}"
+			pt=@result_surface_points[ind]
+			z=self.place_on_terrace(pt)
+			pt.z=z if z
+		}
+		Sketchup.status_text = ""
+	end
+	
+	def place_on_terrace(pt)
+		cnt=0
+		z=0
+		r=0
+		r_min=Float::MAX
+		z_rmin=0
+		@nodal_points.each{|nodal_pt|
+			r=(Math.sqrt((pt.x - nodal_pt.x) ** 2 + (pt.y - nodal_pt.y) ** 2))
+			if r==0
+				z=nodal_pt.z
+				break
+			end
+			x_dist=(pt.x - nodal_pt.x).abs
+			y_dist=(pt.y - nodal_pt.y).abs
+			if x_dist<@cell_x_size and y_dist<@cell_y_size
+				z+=nodal_pt.z
+				cnt+=1
+			end
+			if r_min>r
+				r_min=r
+				z_rmin=nodal_pt.z
+			end
+		}
+		if cnt>0
+			z=z/cnt.to_f
+		else
+			z=z_rmin
+		end
+		z
 	end
 	
 	def pre_calc_horizontals
@@ -228,6 +348,32 @@ class Lss_Pnts2mesh_Entity
 	
 	def generate_results
 		@lss_pnts2mesh_dict="lsspnts2mesh" + "_" + Time.now.to_f.to_s
+		case @calc_alg
+			when "distance"
+			self.generation_proc
+			when "average"
+			self.pre_calc_average
+			wait4results_timer_id=UI.start_timer(0.1,true) {
+				if @calculation_complete
+					UI.stop_timer(wait4results_timer_id)
+					self.pre_calc_horizontals if @draw_horizontals=="true"
+					self.generation_proc
+				end
+			}
+			when "minimize"
+			self.pre_calc_minimize
+			wait4results_timer_id=UI.start_timer(0.1,true) {
+				if @calculation_complete
+					UI.stop_timer(wait4results_timer_id)
+					self.pre_calc_horizontals if @draw_horizontals=="true"
+					self.generation_proc
+				end
+			}
+		end
+		
+	end
+	
+	def generation_proc
 		status = @model.start_operation($lsstoolbarStrings.GetString("LSS Make 3D Mesh"))
 		self.generate_nodal_c_points
 		self.generate_surface_group
@@ -247,7 +393,10 @@ class Lss_Pnts2mesh_Entity
 	def generate_surface_group
 		@result_surface=@entities.add_group
 		surf_mesh=Geom::PolygonMesh.new
+		prgr_bar=Lss_Toolbar_Progr_Bar.new(@cells_x_cnt-1,"|","_",2)
 		for x in 0..@cells_x_cnt-2
+			prgr_bar.update(x)
+			Sketchup.status_text = "#{$lsstoolbarStrings.GetString("Generating result surface:")} #{prgr_bar.progr_string}"
 			for y in 0..@cells_y_cnt-2
 				ind1=x*(@cells_y_cnt)+y
 				ind2=x*(@cells_y_cnt)+y+1
@@ -266,19 +415,24 @@ class Lss_Pnts2mesh_Entity
 		param =8 if @soft_surf=="false" and @smooth_surf=="true"
 		param =12 if @soft_surf=="true" and @smooth_surf=="true"
 		@result_surface.entities.add_faces_from_mesh(surf_mesh, param)
+		Sketchup.status_text = ""
 	end
 	
 	def generate_horizontals_group
 		return if @horizontal_points.nil?
 		return if @horizontal_points.length==0
 		@horizontals_group=@entities.add_group
+		prgr_bar=Lss_Toolbar_Progr_Bar.new(@horizontal_points.length-1,"|","_",2)
 		ind=0
 		while ind<@horizontal_points.length-2
+			prgr_bar.update(ind)
+			Sketchup.status_text = "#{$lsstoolbarStrings.GetString("Generating horizontals:")} #{prgr_bar.progr_string}"
 			pt1=@horizontal_points[ind]
 			pt2=@horizontal_points[ind+1]
 			@horizontals_group.entities.add_line(pt1, pt2)
 			ind+=2
 		end
+		Sketchup.status_text = ""
 	end
 	
 	def store_settings
@@ -657,6 +811,7 @@ class Lss_Pnts2mesh_Tool
 	end
 	
 	def make_pnts2mesh_entity
+		@pnts2mesh_entity.finish_timer=true if @pnts2mesh_entity # It is necessary to stop previously started timer if any inside old entity before new entity creation
 		@pnts2mesh_entity=Lss_Pnts2mesh_Entity.new
 		@pnts2mesh_entity.nodal_points=@nodal_points
 		# Settings section
@@ -772,6 +927,10 @@ class Lss_Pnts2mesh_Tool
 	def draw(view)
 		if @ip.valid?
 			@ip.draw(view)
+		end
+		if @pnts2mesh_entity
+			@result_surface_points=@pnts2mesh_entity.result_surface_points
+			@horizontal_points=@pnts2mesh_entity.horizontal_points
 		end
 		@view_bounds=Array.new
 		if @result_surface_points

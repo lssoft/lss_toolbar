@@ -345,6 +345,9 @@ class Lss_Crvsmth_Entity
 	def generate_results
 		@lss_crvsmth_dict="lsscrvsmth" + "_" + Time.now.to_f.to_s
 		status = @model.start_operation($lsstoolbarStrings.GetString("LSS Recursively Smoothed Curve"))
+		if @init_curve
+			@entities.erase_entities(@init_curve.edges) if @init_curve.edges.length>0
+		end
 		self.generate_nodal_c_points
 		self.generate_adj_pts if @curve_closed=="false"
 		self.generate_init_curve if @leave_initial=="true" # Order matters: it is necessary to enclose existing initial curve in group prior smoothed curve creation
@@ -372,9 +375,6 @@ class Lss_Crvsmth_Entity
 	def generate_init_curve
 		@init_curve_group=@entities.add_group
 		@init_curve_group.entities.add_curve(@nodal_points)
-		if @init_curve
-			@entities.erase_entities(@init_curve.edges)
-		end
 	end
 	
 	def generate_curve
