@@ -144,7 +144,12 @@ function radio_click(btn) {
 }
 
 function send_setting(setting_control) {
-	act_name="obtain_setting"+ delimiter+ setting_control.id+ delimiter +setting_control.value;
+	if (setting_control.type == 'checkbox') {
+		act_name="obtain_setting"+ delimiter+ setting_control.id+ delimiter +setting_control.checked;
+	}
+	else {
+		act_name="obtain_setting"+ delimiter+ setting_control.id+ delimiter +setting_control.value;
+	}
 	callRuby(act_name);
 	callRuby('get_settings');
 }

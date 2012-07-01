@@ -28,7 +28,7 @@ class Lss_Pnts2mesh_Cmd
 		$lssToolbar.add_item(lss_pnts2mesh_cmd)
 		$lssMenu.add_item(lss_pnts2mesh_cmd)
 	end
-end #class Lss_PathFace_Cmds
+end #class LSS_Pnts2mesh_Cmds
 
 class Lss_Pnts2mesh_Entity
 	# Input Data
@@ -54,6 +54,8 @@ class Lss_Pnts2mesh_Entity
 	# Timer
 	attr_accessor :finish_timer
 	attr_accessor :calculation_complete
+	# Other
+	attr_accessor :make_show_tool
 	
 	def initialize
 		# Input Data
@@ -70,6 +72,9 @@ class Lss_Pnts2mesh_Entity
 		@draw_horizontals="false"
 		@horizontals_step=50.0
 		@horizontals_origin="world" # alternative is "local"
+		
+		@z_steps=30
+		@make_show_tool=false
 		# Results
 		@result_surface_points=nil
 		@horizontal_points=nil
@@ -103,6 +108,7 @@ class Lss_Pnts2mesh_Entity
 	end
 	
 	def make_init_pts_arr
+		return if @nodal_points.nil?
 		@cells_x_cnt=@cells_x_cnt.to_i
 		@cells_y_cnt=@cells_y_cnt.to_i
 		@result_surface_points=Array.new
@@ -127,6 +133,7 @@ class Lss_Pnts2mesh_Entity
 	end
 	
 	def pre_calc_dist
+		return if @result_surface_points.nil?
 		prgr_bar=Lss_Toolbar_Progr_Bar.new(@result_surface_points.length,"|","_",2)
 		@result_surface_points.each_index{|ind|
 			prgr_bar.update(ind)
@@ -168,11 +175,15 @@ class Lss_Pnts2mesh_Entity
 	end
 	
 	def pre_calc_average
+		return if @nodal_points.nil?
 		self.make_terraces
 		@finish_timer=false
 		@calculation_complete=false
 		times=@average_times.to_i
+		prgr_bar=Lss_Toolbar_Progr_Bar.new(times,"|","_",2)
 		avg_timer_id=UI.start_timer(0.1,true) {
+			prgr_bar.update(@average_times.to_i-times)
+			Sketchup.status_text = "#{$lsstoolbarStrings.GetString("Performing average smoothing:")} #{prgr_bar.progr_string}"
 			self.average_one_step
 			self.pre_calc_horizontals if @draw_horizontals=="true"
 			view=Sketchup.active_model.active_view
@@ -182,11 +193,15 @@ class Lss_Pnts2mesh_Entity
 				self.pre_calc_horizontals if @draw_horizontals=="true"
 				avg_timer_id=UI.stop_timer(avg_timer_id)
 				@calculation_complete=true
+				Sketchup.status_text = ""
 			end
 		}
 	end
 	
 	def average_one_step
+		return if @result_surface_points.nil?
+		@cells_x_cnt=@cells_x_cnt.to_i
+		@cells_y_cnt=@cells_y_cnt.to_i
 		for x in 0..@cells_x_cnt-1
 			for y in 0..@cells_y_cnt-1
 				ind0=x*(@cells_y_cnt)+y
@@ -235,10 +250,107 @@ class Lss_Pnts2mesh_Entity
 	end
 	
 	def pre_calc_minimize
-		
+		return if @nodal_points.nil?
+		self.make_terraces
+		@finish_timer=false
+		@calculation_complete=false
+		times=@minimize_times.to_i
+		prgr_bar=Lss_Toolbar_Progr_Bar.new(times,"|","_",2)
+		min_timer_id=UI.start_timer(0.1,true) {
+			prgr_bar.update(@minimize_times.to_i-times)
+			Sketchup.status_text = "#{$lsstoolbarStrings.GetString("Performing minimize cumulative length smoothing:")} #{prgr_bar.progr_string}"
+			self.minimize_one_step
+			self.pre_calc_horizontals if @draw_horizontals=="true"
+			view=Sketchup.active_model.active_view
+			view.invalidate
+			times-=1
+			if times==0 or @finish_timer
+				self.pre_calc_horizontals if @draw_horizontals=="true"
+				min_timer_id=UI.stop_timer(min_timer_id)
+				@calculation_complete=true
+				Sketchup.status_text = ""
+			end
+		}
+	end
+	
+	def minimize_one_step
+		return if @result_surface_points.nil?
+		@cells_x_cnt=@cells_x_cnt.to_i
+		@cells_y_cnt=@cells_y_cnt.to_i
+		for x in 0..@cells_x_cnt-1
+			for y in 0..@cells_y_cnt-1
+				ind0=x*(@cells_y_cnt)+y
+				
+				ind1=x*(@cells_y_cnt)+y+1
+				ind2=x*(@cells_y_cnt)+y-1
+				ind3=(x+1)*(@cells_y_cnt)+y
+				ind4=(x-1)*(@cells_y_cnt)+y
+				ind_arr=[ind1, ind2, ind3, ind4]
+				z=0
+				cnt=0
+				r=0
+				pt=@result_surface_points[ind0]
+				ngb_arr=Array.new
+				ind_arr.each{|ind|
+					if ind>=0 and ind<@result_surface_points.length
+						ngb_arr<<@result_surface_points[ind]
+					end
+				}
+				@nodal_points.each{|nodal_pt|
+					r=(Math.sqrt((pt.x - nodal_pt.x) ** 2 + (pt.y - nodal_pt.y) ** 2))
+					if r==0
+						z=nodal_pt.z
+						break
+					end
+					x_dist=(pt.x - nodal_pt.x).abs
+					y_dist=(pt.y - nodal_pt.y).abs
+					if x_dist<@cell_x_size and y_dist<@cell_y_size
+						z+=nodal_pt.z
+						cnt+=1
+					end
+				}
+				if cnt>0
+					z=z/cnt.to_f
+				else
+					if r>0
+						ngbs_eql=true
+						ngb_arr.each_index{|ind|
+							if ngb_arr[0]!=ngb_arr[ind]
+								ngbs_eql=false
+								break
+							end
+						}
+						if ngbs_eql
+							z=ngb_arr[0].z
+						else
+							max_z_ngb=ngb_arr.max{|a, b| a.z <=> b.z}
+							min_z_ngb=ngb_arr.min{|a, b| a.z <=> b.z}
+							delta_z=(max_z_ngb.z-min_z_ngb.z)/@z_steps.to_f
+							sum_len=0
+							prev_sum_len=Float::MAX
+							for z_step in 0..@z_steps.to_i
+								z=min_z_ngb.z+z_step*delta_z
+								sum_len=0
+								ngb_arr.each{|ngb|
+									new_pt=Geom::Point3d.new(pt.x, pt.y, z)
+									sum_len+=new_pt.distance(ngb) if ngb
+								}
+								if sum_len>prev_sum_len
+									break
+								else
+									prev_sum_len=sum_len
+								end
+							end
+						end
+					end
+				end
+				@result_surface_points[ind0]=Geom::Point3d.new(pt.x, pt.y, z)
+			end
+		end
 	end
 	
 	def make_terraces
+		return if @result_surface_points.nil?
 		prgr_bar=Lss_Toolbar_Progr_Bar.new(@result_surface_points.length,"|","_",2)
 		@result_surface_points.each_index{|ind|
 			prgr_bar.update(ind)
@@ -282,6 +394,7 @@ class Lss_Pnts2mesh_Entity
 	end
 	
 	def pre_calc_horizontals
+		return if @result_surface_points.nil?
 		@horizontal_points=Array.new
 		step_offset_vec=Geom::Vector3d.new(0,0,1)
 		bb=Geom::BoundingBox.new
@@ -352,21 +465,49 @@ class Lss_Pnts2mesh_Entity
 			when "distance"
 			self.generation_proc
 			when "average"
+			if @make_show_tool
+				show_tool=Lss_Show_Process_Tool.new
+				Sketchup.active_model.select_tool(show_tool)
+			end
+			@calculation_complete=false
 			self.pre_calc_average
 			wait4results_timer_id=UI.start_timer(0.1,true) {
+				if @make_show_tool
+					show_tool.result_surface_points=@result_surface_points
+					show_tool.horizontal_points=@horizontal_points
+					show_tool.cells_x_cnt=@cells_x_cnt
+					show_tool.cells_y_cnt=@cells_y_cnt
+				end
 				if @calculation_complete
 					UI.stop_timer(wait4results_timer_id)
 					self.pre_calc_horizontals if @draw_horizontals=="true"
 					self.generation_proc
+					if @make_show_tool
+						Sketchup.active_model.select_tool(nil)
+					end
 				end
 			}
 			when "minimize"
+			if @make_show_tool
+				show_tool=Lss_Show_Process_Tool.new
+				Sketchup.active_model.select_tool(show_tool)
+			end
+			@calculation_complete=false
 			self.pre_calc_minimize
 			wait4results_timer_id=UI.start_timer(0.1,true) {
+				if @make_show_tool
+					show_tool.result_surface_points=@result_surface_points
+					show_tool.horizontal_points=@horizontal_points
+					show_tool.cells_x_cnt=@cells_x_cnt
+					show_tool.cells_y_cnt=@cells_y_cnt
+				end
 				if @calculation_complete
 					UI.stop_timer(wait4results_timer_id)
 					self.pre_calc_horizontals if @draw_horizontals=="true"
 					self.generation_proc
+					if @make_show_tool
+						Sketchup.active_model.select_tool(nil)
+					end
 				end
 			}
 		end
@@ -468,6 +609,90 @@ class Lss_Pnts2mesh_Entity
 	end
 end #class Lss_Pnts2mesh_Entity
 
+class Lss_Show_Process_Tool
+	attr_accessor :result_surface_points
+	attr_accessor :horizontal_points
+	attr_accessor :cells_x_cnt
+	attr_accessor :cells_y_cnt
+	def initialize
+		@result_surface_points=nil
+		@horizontal_points=nil
+		@surface_col=Sketchup::Color.new("white")
+		@surface_col.alpha=0.5
+	end
+	
+	# This is 'must have' method to draw everything correctly
+	def getExtents
+		bb=Sketchup.active_model.bounds
+		if @view_bounds
+			if @view_bounds.length>0
+				@view_bounds.each{|pt|
+					bb.add(pt)
+				}
+			else
+				bb = Sketchup.active_model.bounds
+			end
+		else
+			bb = Sketchup.active_model.bounds
+		end
+		return bb
+	end
+	
+	def draw(view)
+		@view_bounds=Array.new
+		if @result_surface_points
+			if @result_surface_points.length>0
+				@result_surface_points.each{|pt|
+					@view_bounds<<pt
+				}
+			end
+		end
+		if @nodal_points
+			if @nodal_points.length>0
+				@nodal_points.each{|pt|
+					@view_bounds<<pt
+				}
+			end
+		end
+		self.draw_result_surface_points(view) if @result_surface_points
+		self.draw_horizontals(view) if @horizontal_points
+	end
+	
+	def draw_horizontals(view)
+		return if @horizontal_points.length==0
+		horiz_pts2d=Array.new
+		@horizontal_points.each{|pt|
+			horiz_pts2d<<view.screen_coords(pt)
+		}
+		view.drawing_color="black"
+		view.draw2d(GL_LINES, horiz_pts2d)
+		view.draw2d(GL_LINES, horiz_pts2d)
+	end
+	
+	def draw_result_surface_points(view)
+		@cells_x_cnt=@cells_x_cnt.to_i
+		@cells_y_cnt=@cells_y_cnt.to_i
+		return if @result_surface_points.length==0
+		for x in 0..@cells_x_cnt-2
+			for y in 0..@cells_y_cnt-2
+				ind1=x*(@cells_y_cnt)+y
+				ind2=x*(@cells_y_cnt)+y+1
+				ind3=(x+1)*(@cells_y_cnt)+y+1
+				ind4=(x+1)*(@cells_y_cnt)+y
+				pt1=@result_surface_points[ind1]
+				pt2=@result_surface_points[ind2]
+				pt3=@result_surface_points[ind3]
+				pt4=@result_surface_points[ind4]
+				view.drawing_color=@surface_col
+				view.draw(GL_POLYGON, [pt1, pt2, pt3])
+				view.draw(GL_POLYGON, [pt3, pt4, pt1])
+			end
+		end
+		view.line_width=2
+		view.draw_points(@result_surface_points, 3, 2, "red")
+	end
+end
+
 class Lss_Pnts2mesh_Refresh
 	def initialize
 		@model=Sketchup.active_model
@@ -532,7 +757,8 @@ class Lss_Pnts2mesh_Refresh
 							@pnts2mesh_entity.draw_horizontals=@draw_horizontals
 							@pnts2mesh_entity.horizontals_step=@horizontals_step
 							@pnts2mesh_entity.horizontals_origin=@horizontals_origin
-						
+							@pnts2mesh_entity.make_show_tool=true if lss_pnts2mesh_attr_dicts.length==1 # To enable surface processing show
+							
 							@pnts2mesh_entity.perform_pre_calc
 							self.clear_previous_results(lss_pnts2mesh_attr_dict_name)
 							@pnts2mesh_entity.generate_results
@@ -608,6 +834,8 @@ class Lss_Pnts2mesh_Tool
 		@average_times=5
 		@minimize_times=5
 		@power=3.0
+		@soft_surf="false"
+		@smooth_surf="false"
 		@draw_horizontals="false"
 		@horizontals_step=50.0
 		@horizontals_origin="world" # alternative is "local"
@@ -639,7 +867,7 @@ class Lss_Pnts2mesh_Tool
 		@draw_horizontals=Sketchup.read_default("LSS_Pnts2mesh", "draw_horizontals", "false")
 		@horizontals_step=Sketchup.read_default("LSS_Pnts2mesh", "horizontals_step", "50")
 		@horizontals_origin=Sketchup.read_default("LSS_Pnts2mesh", "horizontals_origin", "world")
-		@transp_level=Sketchup.read_default("LSS_Pathface", "transp_level", 50).to_i
+		@transp_level=Sketchup.read_default("LSS_Pnts2mesh", "transp_level", 50).to_i
 		self.settings2hash
 	end
 	
@@ -699,11 +927,13 @@ class Lss_Pnts2mesh_Tool
 						last_pt=@nodal_points.pop
 					end
 					@pnts2mesh_entity.generate_results
+					self.write_defaults
 					self.reset(view)
 				else
 					self.make_pnts2mesh_entity
 					if @pnts2mesh_entity
 						@pnts2mesh_entity.generate_results
+						self.write_defaults
 						self.reset(view)
 					else
 						UI.messagebox($lsstoolbarStrings.GetString("Draw or select some construction points before clicking 'Apply'"))
@@ -717,8 +947,8 @@ class Lss_Pnts2mesh_Tool
 				self.onSetCursor
 			end
 			if action_name=="get_settings" # From Ruby to web-dialog
+				self.make_pnts2mesh_entity
 				self.send_settings2dlg
-				self.send_curve2dlg if @init_curve
 				view=Sketchup.active_model.active_view
 				view.invalidate
 			end
@@ -967,6 +1197,7 @@ class Lss_Pnts2mesh_Tool
 		return if @nodal_points.length==0
 		view.line_width=2
 		view.draw_points(@nodal_points, 12, 3, "black")
+		self.send_nodal_points_2dlg
 	end
 	
 	def draw_result_surface_points(view)
@@ -1004,13 +1235,9 @@ class Lss_Pnts2mesh_Tool
 	def reset(view)
 		@ip.clear
 		@ip1.clear
-		if( view )
-			view.tooltip = nil
-			view.invalidate
-		end
 		@pick_state=nil # Indicates cursor type while the tool is active
 		# Entities section
-		@nodal_c_points
+		@nodal_c_points=nil
 		# Display section
 		@under_cur_invalid_bnds=nil
 		@highlight_col=Sketchup::Color.new("green")		# Highlights picked entities
@@ -1023,6 +1250,11 @@ class Lss_Pnts2mesh_Tool
 		# Settings
 		self.read_defaults
 		self.send_settings2dlg
+		if( view )
+			view.tooltip = nil
+			view.invalidate
+		end
+		@pnts2mesh_entity=nil
 	end
 
 	def deactivate(view)
@@ -1059,10 +1291,8 @@ class Lss_Pnts2mesh_Tool
 		}
 		vec2zero=bb.min.vector_to(Geom::Point3d.new(0,0,0))
 		move2zero_tr=Geom::Transformation.new(vec2zero)
-		bb=Geom::BoundingBox.new
 		nodal_pts.each_index{|ind|
 			pt=Geom::Point3d.new(nodal_pts[ind])
-			bb.add(pt)
 			nodal_pts[ind]=pt.transform(move2zero_tr)
 		}
 		
@@ -1091,11 +1321,13 @@ class Lss_Pnts2mesh_Tool
 			last_pt=@nodal_points.pop # It is necessary to delete last point since it was clicked twice and it coincides with previous
 			if @pnts2mesh_entity
 				@pnts2mesh_entity.generate_results
+				self.write_defaults
 				self.reset(view)
 			else
 				self.make_pnts2mesh_entity
 				if @pnts2mesh_entity
 					@pnts2mesh_entity.generate_results
+					self.write_defaults
 					self.reset(view)
 				else
 					UI.messagebox($lsstoolbarStrings.GetString("Draw or select some construction points before clicking 'Apply'"))
@@ -1121,6 +1353,8 @@ class Lss_Pnts2mesh_Tool
 
 	def onCancel(reason, view)
 		if reason==0
+			puts("Cancelling surface creation")
+			@pnts2mesh_entity.finish_timer=true if @pnts2mesh_entity
 			self.reset(view)
 		end
 	end
@@ -1143,6 +1377,7 @@ class Lss_Pnts2mesh_Tool
 					last_pt=@nodal_points.pop
 					self.make_pnts2mesh_entity
 					@pnts2mesh_entity.generate_results
+					self.write_defaults
 					self.reset(view)
 				end
 			}
@@ -1166,7 +1401,7 @@ class Lss_Pnts2mesh_Tool
 		return dir_path
 	end
 	
-end #class Lss_PathFace_Tool
+end #class LSS_Pnts2mesh_Tool
 
 
 if( not file_loaded?("lss_pnts2mesh.rb") )

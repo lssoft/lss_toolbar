@@ -26,6 +26,9 @@ require 'lss_toolbar/lss_crvsmth.rb'
 #initializes 'Make 3D Mesh' tool (19-Jun-12)
 require 'lss_toolbar/lss_pnts2mesh.rb'
 
+#initializes 'Control Points' tool (25-Jun-12)
+require 'lss_toolbar/lss_ctrlpnts.rb'
+
 #initializes 'Voxelate' tool
 require 'lss_toolbar/lss_voxelate.rb'
 

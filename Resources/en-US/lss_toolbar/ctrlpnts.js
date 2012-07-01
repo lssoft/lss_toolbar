@@ -2,6 +2,16 @@ var nodal_points=new Array();
 var points_bnds_hgt=1;
 var points_bnds_wdt=1;
 
+function pick_group() {
+	action_name="pick_group";
+	callRuby(action_name);
+}
+
+function group_picked() {
+	var green_chkd_img=document.images.group_is_picked;
+	green_chkd_img.style.display="";
+}
+
 function estimate_scale(hgt, wdt, canvas_elt) {
 	var scale_fact1=(canvas_elt.offsetHeight-5)/hgt;
 	var scale_fact2=(canvas_elt.offsetWidth-5)/wdt;
@@ -108,26 +118,14 @@ function custom_init() {
 		if (soft_surf=="true" && smooth_surf=="true"){
 			radio_click(document.getElementById("soft_smooth"));
 		}
-		if (settings_arr[i][0]=="calc_alg"){
-			var calc_alg=settings_arr[i][1];
-			if (calc_alg=="distance") {
-				radio_click(document.getElementById("distance"));
-			}
-			if (calc_alg=="average") {
-				radio_click(document.getElementById("average"));
-			}
-			if (calc_alg=="minimize") {
-				radio_click(document.getElementById("minimize"));
-			}
+		if (settings_arr[i][0]=="c_obj_type"){
+			var c_obj_type=settings_arr[i][1]
 		}
-		if (settings_arr[i][0]=="horizontals_origin"){
-			var calc_alg=settings_arr[i][1];
-			if (calc_alg=="world") {
-				radio_click(document.getElementById("world"));
-			}
-			if (calc_alg=="local") {
-				radio_click(document.getElementById("local"));
-			}
+		if (c_obj_type=="c_point"){
+			radio_click(document.getElementById("c_point"));
+		}
+		if (c_obj_type=="axes_comp"){
+			radio_click(document.getElementById("axes_comp"));
 		}
 	}
 }
@@ -135,4 +133,6 @@ function custom_init() {
 function custom_reset() {
 	div_canvas=document.getElementById("pnts_canvas");
 	div_canvas.innerHTML="";
+	var green_chkd_img=document.images.group_is_picked;
+	green_chkd_img.style.display="none";
 }

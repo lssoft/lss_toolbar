@@ -732,7 +732,7 @@ class Lss_Crvsmth_Tool
 						@crvsmth_entity.generate_results
 						self.reset(view)
 					else
-						UI.messagebox($lsstoolbarStrings.GetString("Pick or curve before clicking 'Apply'"))
+						UI.messagebox($lsstoolbarStrings.GetString("Pick or draw curve before clicking 'Apply'"))
 					end
 				end
 			end
