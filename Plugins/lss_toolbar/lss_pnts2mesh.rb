@@ -43,11 +43,15 @@ class Lss_Pnts2mesh_Entity
 	attr_accessor :soft_surf
 	attr_accessor :smooth_surf
 	attr_accessor :draw_horizontals
+	attr_accessor :draw_gradient
 	attr_accessor :horizontals_step
 	attr_accessor :horizontals_origin
+	attr_accessor :max_color
+	attr_accessor :min_color
 	# Results
 	attr_accessor :result_surface_points
 	attr_accessor :horizontal_points
+	attr_accessor :result_mats
 	# Pnts2mesh entity parts
 	attr_accessor :nodal_c_points
 	attr_accessor :result_surface
@@ -70,14 +74,18 @@ class Lss_Pnts2mesh_Entity
 		@soft_surf="false"
 		@smooth_surf="false"
 		@draw_horizontals="false"
+		@draw_gradient="false"
 		@horizontals_step=50.0
 		@horizontals_origin="world" # alternative is "local"
+		@max_color=nil
+		@min_color=nil
 		
 		@z_steps=30
 		@make_show_tool=false
 		# Results
 		@result_surface_points=nil
 		@horizontal_points=nil
+		@result_mats=nil
 		# Pnts2mesh entity parts
 		@nodal_c_points=nil
 		@result_surface=nil
@@ -92,6 +100,16 @@ class Lss_Pnts2mesh_Entity
 	
 	def perform_pre_calc
 		self.make_init_pts_arr
+		if @max_color.is_a?(Fixnum)
+			@max_color=Sketchup::Color.new(@max_color.to_i) 
+		else
+			@max_color=Sketchup::Color.new(@max_color.hex) 
+		end
+		if @min_color.is_a?(Fixnum)
+			@min_color=Sketchup::Color.new(@min_color.to_i) 
+		else
+			@min_color=Sketchup::Color.new(@min_color.hex) 
+		end
 		case @calc_alg
 			when "distance"
 			self.pre_calc_dist
@@ -532,6 +550,11 @@ class Lss_Pnts2mesh_Entity
 	end
 	
 	def generate_surface_group
+		bb=Geom::BoundingBox.new
+		@nodal_points.each{|pt|
+			bb.add(pt)
+		}
+		max_delta_z=(bb.max.z-bb.min.z).abs
 		@result_surface=@entities.add_group
 		surf_mesh=Geom::PolygonMesh.new
 		prgr_bar=Lss_Toolbar_Progr_Bar.new(@cells_x_cnt-1,"|","_",2)
@@ -547,15 +570,61 @@ class Lss_Pnts2mesh_Entity
 				pt2=@result_surface_points[ind2]
 				pt3=@result_surface_points[ind3]
 				pt4=@result_surface_points[ind4]
-				surf_mesh.add_polygon(pt1, pt2, pt3)
-				surf_mesh.add_polygon(pt3, pt4, pt1)
+				if @draw_gradient=="true"
+					r_max=@max_color.red
+					g_max=@max_color.green
+					b_max=@max_color.blue
+					r_min=@min_color.red
+					g_min=@min_color.green
+					b_min=@min_color.blue
+					delta_r=r_max-r_min
+					delta_g=g_max-g_min
+					delta_b=b_max-b_min
+					fc1=@result_surface.entities.add_face(pt1, pt2, pt3)
+					avg_delta_z1=((pt1.z+pt2.z+pt3.z)/3.0-bb.min.z).abs
+					if max_delta_z>0
+						coeff=avg_delta_z1/max_delta_z
+					else
+						coeff=0
+					end
+					r=(r_min+coeff*delta_r).to_i
+					g=(g_min+coeff*delta_g).to_i
+					b=(b_min+coeff*delta_b).to_i
+					new_col1=Sketchup::Color.new(b, g, r) # That's pretty weird, that it is necessary to switch r and b values...
+					fc2=@result_surface.entities.add_face(pt3, pt4, pt1)
+					avg_delta_z2=((pt3.z+pt4.z+pt1.z)/3.0-bb.min.z).abs
+					if max_delta_z>0
+						coeff=avg_delta_z2/max_delta_z
+					else
+						coeff=0
+					end
+					r=(r_min+coeff*delta_r).to_i
+					g=(g_min+coeff*delta_g).to_i
+					b=(b_min+coeff*delta_b).to_i
+					new_col2=Sketchup::Color.new(b, g, r) # That's pretty weird, that it is necessary to switch r and b values...
+					fc1.edges.each{|edg|
+						edg.soft=true if @soft_surf=="true"
+						edg.smooth=true if @smooth_surf=="true"
+					}
+					fc2.edges.each{|edg|
+						edg.soft=true if @soft_surf=="true"
+						edg.smooth=true if @smooth_surf=="true"
+					}
+					fc1.material=new_col1; fc1.back_material=new_col1
+					fc2.material=new_col2; fc2.back_material=new_col2
+				else
+					surf_mesh.add_polygon(pt1, pt2, pt3)
+					surf_mesh.add_polygon(pt3, pt4, pt1)
+				end
 			end
 		end
-		param =0 if @soft_surf=="false" and @smooth_surf=="false"
-		param =4 if @soft_surf=="true" and @smooth_surf=="false"
-		param =8 if @soft_surf=="false" and @smooth_surf=="true"
-		param =12 if @soft_surf=="true" and @smooth_surf=="true"
-		@result_surface.entities.add_faces_from_mesh(surf_mesh, param)
+		if @draw_gradient=="false"
+			param =0 if @soft_surf=="false" and @smooth_surf=="false"
+			param =4 if @soft_surf=="true" and @smooth_surf=="false"
+			param =8 if @soft_surf=="false" and @smooth_surf=="true"
+			param =12 if @soft_surf=="true" and @smooth_surf=="true"
+			@result_surface.entities.add_faces_from_mesh(surf_mesh, param)
+		end
 		Sketchup.status_text = ""
 	end
 	
@@ -592,8 +661,11 @@ class Lss_Pnts2mesh_Entity
 		@result_surface.set_attribute(@lss_pnts2mesh_dict, "soft_surf", @soft_surf)
 		@result_surface.set_attribute(@lss_pnts2mesh_dict, "smooth_surf", @smooth_surf)
 		@result_surface.set_attribute(@lss_pnts2mesh_dict, "draw_horizontals", @draw_horizontals)
+		@result_surface.set_attribute(@lss_pnts2mesh_dict, "draw_gradient", @draw_gradient)
 		@result_surface.set_attribute(@lss_pnts2mesh_dict, "horizontals_step", @horizontals_step)
 		@result_surface.set_attribute(@lss_pnts2mesh_dict, "horizontals_origin", @horizontals_origin)
+		@result_surface.set_attribute(@lss_pnts2mesh_dict, "max_color", @max_color.to_i)
+		@result_surface.set_attribute(@lss_pnts2mesh_dict, "min_color", @min_color.to_i)
 		
 		if @draw_horizontals=="true"
 			if @horizontals_group
@@ -755,8 +827,11 @@ class Lss_Pnts2mesh_Refresh
 							@pnts2mesh_entity.soft_surf=@soft_surf
 							@pnts2mesh_entity.smooth_surf=@smooth_surf
 							@pnts2mesh_entity.draw_horizontals=@draw_horizontals
+							@pnts2mesh_entity.draw_gradient=@draw_gradient
 							@pnts2mesh_entity.horizontals_step=@horizontals_step
 							@pnts2mesh_entity.horizontals_origin=@horizontals_origin
+							@pnts2mesh_entity.max_color=@max_color
+							@pnts2mesh_entity.min_color=@min_color
 							@pnts2mesh_entity.make_show_tool=true if lss_pnts2mesh_attr_dicts.length==1 # To enable surface processing show
 							
 							@pnts2mesh_entity.perform_pre_calc
@@ -792,8 +867,11 @@ class Lss_Pnts2mesh_Refresh
 						@soft_surf=@result_surface.get_attribute(obj_name, "soft_surf")
 						@smooth_surf=@result_surface.get_attribute(obj_name, "smooth_surf")
 						@draw_horizontals=@result_surface.get_attribute(obj_name, "draw_horizontals")
+						@draw_gradient=@result_surface.get_attribute(obj_name, "draw_gradient")
 						@horizontals_step=@result_surface.get_attribute(obj_name, "horizontals_step")
 						@horizontals_origin=@result_surface.get_attribute(obj_name, "horizontals_origin")
+						@max_color=@result_surface.get_attribute(obj_name, "max_color")
+						@min_color=@result_surface.get_attribute(obj_name, "min_color")
 						when "horizontals_group"
 						@horizontals_group=ent
 					end
@@ -839,6 +917,9 @@ class Lss_Pnts2mesh_Tool
 		@draw_horizontals="false"
 		@horizontals_step=50.0
 		@horizontals_origin="world" # alternative is "local"
+		@draw_gradient="false"
+		@max_color=nil
+		@min_color=nil
 		# Display section
 		@under_cur_invalid_bnds=nil
 		@highlight_col=Sketchup::Color.new("green")		# Highlights picked entities
@@ -865,6 +946,9 @@ class Lss_Pnts2mesh_Tool
 		@soft_surf=Sketchup.read_default("LSS_Pnts2mesh", "soft_surf", "false")
 		@smooth_surf=Sketchup.read_default("LSS_Pnts2mesh", "smooth_surf", "false")
 		@draw_horizontals=Sketchup.read_default("LSS_Pnts2mesh", "draw_horizontals", "false")
+		@draw_gradient=Sketchup.read_default("LSS_Pnts2mesh", "draw_gradient", "false")
+		@max_color=Sketchup.read_default("LSS_Pnts2mesh", "max_color", "0")
+		@min_color=Sketchup.read_default("LSS_Pnts2mesh", "min_color", "0")
 		@horizontals_step=Sketchup.read_default("LSS_Pnts2mesh", "horizontals_step", "50")
 		@horizontals_origin=Sketchup.read_default("LSS_Pnts2mesh", "horizontals_origin", "world")
 		@transp_level=Sketchup.read_default("LSS_Pnts2mesh", "transp_level", 50).to_i
@@ -881,6 +965,9 @@ class Lss_Pnts2mesh_Tool
 		@settings_hash["soft_surf"]=[@soft_surf, "boolean"]
 		@settings_hash["smooth_surf"]=[@smooth_surf, "boolean"]
 		@settings_hash["draw_horizontals"]=[@draw_horizontals, "boolean"]
+		@settings_hash["draw_gradient"]=[@draw_gradient, "boolean"]
+		@settings_hash["max_color"]=[@max_color, "color"]
+		@settings_hash["min_color"]=[@min_color, "color"]
 		@settings_hash["horizontals_step"]=[@horizontals_step, "distance"]
 		@settings_hash["horizontals_origin"]=[@horizontals_origin, "string"]
 		@settings_hash["transp_level"]=[@transp_level, "integer"]
@@ -897,6 +984,9 @@ class Lss_Pnts2mesh_Tool
 		@soft_surf=@settings_hash["soft_surf"][0]
 		@smooth_surf=@settings_hash["smooth_surf"][0]
 		@draw_horizontals=@settings_hash["draw_horizontals"][0]
+		@draw_gradient=@settings_hash["draw_gradient"][0]
+		@max_color=@settings_hash["max_color"][0]
+		@min_color=@settings_hash["min_color"][0]
 		@horizontals_step=@settings_hash["horizontals_step"][0]
 		@horizontals_origin=@settings_hash["horizontals_origin"][0]
 		@transp_level=@settings_hash["transp_level"][0]
@@ -1054,6 +1144,9 @@ class Lss_Pnts2mesh_Tool
 		@pnts2mesh_entity.soft_surf=@soft_surf
 		@pnts2mesh_entity.smooth_surf=@smooth_surf
 		@pnts2mesh_entity.draw_horizontals=@draw_horizontals
+		@pnts2mesh_entity.draw_gradient=@draw_gradient
+		@pnts2mesh_entity.max_color=@max_color
+		@pnts2mesh_entity.min_color=@min_color
 		@pnts2mesh_entity.horizontals_step=@horizontals_step
 		@pnts2mesh_entity.horizontals_origin=@horizontals_origin
 	
@@ -1201,6 +1294,11 @@ class Lss_Pnts2mesh_Tool
 	end
 	
 	def draw_result_surface_points(view)
+		bb=Geom::BoundingBox.new
+		@nodal_points.each{|pt|
+			bb.add(pt)
+		}
+		max_delta_z=(bb.max.z-bb.min.z).abs
 		@cells_x_cnt=@cells_x_cnt.to_i
 		@cells_y_cnt=@cells_y_cnt.to_i
 		return if @result_surface_points.length==0
@@ -1214,9 +1312,57 @@ class Lss_Pnts2mesh_Tool
 				pt2=@result_surface_points[ind2]
 				pt3=@result_surface_points[ind3]
 				pt4=@result_surface_points[ind4]
-				view.drawing_color=@surface_col
-				view.draw(GL_POLYGON, [pt1, pt2, pt3])
-				view.draw(GL_POLYGON, [pt3, pt4, pt1])
+				if @draw_gradient=="true"
+					if @max_color.is_a?(Fixnum)
+						max_color=Sketchup::Color.new(@max_color.to_i) 
+					else
+						max_color=Sketchup::Color.new(@max_color.hex) 
+					end
+					if @min_color.is_a?(Fixnum)
+						min_color=Sketchup::Color.new(@min_color.to_i) 
+					else
+						min_color=Sketchup::Color.new(@min_color.hex) 
+					end
+					r_max=max_color.red
+					g_max=max_color.green
+					b_max=max_color.blue
+					r_min=min_color.red
+					g_min=min_color.green
+					b_min=min_color.blue
+					delta_r=r_max-r_min
+					delta_g=g_max-g_min
+					delta_b=b_max-b_min
+					avg_delta_z1=((pt1.z+pt2.z+pt3.z)/3.0-bb.min.z).abs
+					if max_delta_z>0
+						coeff=avg_delta_z1/max_delta_z
+					else
+						coeff=0
+					end
+					r=(r_min+coeff*delta_r).to_i
+					g=(g_min+coeff*delta_g).to_i
+					b=(b_min+coeff*delta_b).to_i
+					new_col1=Sketchup::Color.new(b, g, r) # That's pretty weird, that it is necessary to switch r and b values...
+					avg_delta_z2=((pt3.z+pt4.z+pt1.z)/3.0-bb.min.z).abs
+					if max_delta_z>0
+						coeff=avg_delta_z2/max_delta_z
+					else
+						coeff=0
+					end
+					r=(r_min+coeff*delta_r).to_i
+					g=(g_min+coeff*delta_g).to_i
+					b=(b_min+coeff*delta_b).to_i
+					new_col2=Sketchup::Color.new(b, g, r) # That's pretty weird, that it is necessary to switch r and b values...
+					new_col1.alpha=1.0-@transp_level/100.0
+					new_col2.alpha=1.0-@transp_level/100.0
+					view.drawing_color=new_col1
+					view.draw(GL_POLYGON, [pt1, pt2, pt3])
+					view.drawing_color=new_col2
+					view.draw(GL_POLYGON, [pt3, pt4, pt1])
+				else
+					view.drawing_color=@surface_col
+					view.draw(GL_POLYGON, [pt1, pt2, pt3])
+					view.draw(GL_POLYGON, [pt3, pt4, pt1])
+				end
 				if @soft_surf=="false"
 					view.line_width=1
 					view.drawing_color="black"

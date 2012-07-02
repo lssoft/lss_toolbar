@@ -600,8 +600,8 @@ class Lss_Ctrlpnts_Tool
 		@power=Sketchup.read_default("LSS_Ctrlpnts", "power", "3")
 		@draw_isolines=Sketchup.read_default("LSS_Ctrlpnts", "draw_isolines", "false")
 		@draw_gradient=Sketchup.read_default("LSS_Ctrlpnts", "draw_gradient", "false")
-		@max_color=Sketchup.read_default("LSS_Ctrlpnts", "max_color", "false")
-		@min_color=Sketchup.read_default("LSS_Ctrlpnts", "min_color", "false")
+		@max_color=Sketchup.read_default("LSS_Ctrlpnts", "max_color", "0")
+		@min_color=Sketchup.read_default("LSS_Ctrlpnts", "min_color", "0")
 		@soft_surf=Sketchup.read_default("LSS_Ctrlpnts", "soft_surf", "false")
 		@smooth_surf=Sketchup.read_default("LSS_Ctrlpnts", "smooth_surf", "false")
 		@c_obj_type=Sketchup.read_default("LSS_Ctrlpnts", "c_obj_type", "c_point")
@@ -614,8 +614,8 @@ class Lss_Ctrlpnts_Tool
 		@settings_hash["power"]=[@power, "float"]
 		@settings_hash["draw_isolines"]=[@draw_isolines, "boolean"]
 		@settings_hash["draw_gradient"]=[@draw_gradient, "boolean"]
-		@settings_hash["max_color"]=[@max_color, "string"]
-		@settings_hash["min_color"]=[@min_color, "string"]
+		@settings_hash["max_color"]=[@max_color, "color"]
+		@settings_hash["min_color"]=[@min_color, "color"]
 		@settings_hash["soft_surf"]=[@soft_surf, "boolean"]
 		@settings_hash["smooth_surf"]=[@smooth_surf, "boolean"]
 		@settings_hash["c_obj_type"]=[@c_obj_type, "string"]
