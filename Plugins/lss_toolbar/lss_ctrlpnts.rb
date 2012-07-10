@@ -28,7 +28,7 @@ class Lss_Ctrlpnts_Cmd
 		$lssToolbar.add_item(lss_ctrlpnts_cmd)
 		$lssMenu.add_item(lss_ctrlpnts_cmd)
 	end
-end #class Lss_PathFace_Cmds
+end #class Lss_Ctrlpnts_Cmds
 
 class Lss_Ctrlpnts_Entity
 	# Input Data
@@ -131,8 +131,11 @@ class Lss_Ctrlpnts_Entity
 			avg_offset_len=0
 			vec_cnt=0
 			poly_pts.each{|pt|
-				if max_offset_len>0
+				if max_offset_len>0 or @c_obj_type=="axes_comp"
 					offset_vec=self.calc_hyp_r_pwr(pt)
+					if offset_vec.length>max_offset_len
+						max_offset_len=offset_vec.length
+					end
 				else
 					offset_vec=Geom::Vector3d.new
 				end
@@ -1299,7 +1302,7 @@ class Lss_Ctrlpnts_Tool
 		return dir_path
 	end
 	
-end #class Lss_PathFace_Tool
+end #class Lss_Ctrlpnts_Tool
 
 
 if( not file_loaded?("lss_ctrlpnts.rb") )

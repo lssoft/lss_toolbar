@@ -29,6 +29,9 @@ require 'lss_toolbar/lss_pnts2mesh.rb'
 #initializes 'Control Points' tool (25-Jun-12)
 require 'lss_toolbar/lss_ctrlpnts.rb'
 
+#initializes 'Control Points' tool (04-Jul-12)
+require 'lss_toolbar/lss_mshstick.rb'
+
 #initializes 'Voxelate' tool
 require 'lss_toolbar/lss_voxelate.rb'
 

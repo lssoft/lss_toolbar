@@ -55,6 +55,8 @@ class Lss_Common_Cmds
 		lss_refresh_cmd.small_icon = "./tb_icons/refresh_16.png"
 		lss_refresh_cmd.large_icon = "./tb_icons/refresh_24.png"
 		lss_refresh_cmd.tooltip = $lsstoolbarStrings.GetString("Select LSS object(s), then click this button to refresh.")
+		$lssMenu.add_separator
+		$lssToolbar.add_separator
 		$lssToolbar.add_item(lss_refresh_cmd)
 		$lssMenu.add_item(lss_refresh_cmd)
 		
@@ -106,6 +108,8 @@ class Lss_Common_Cmds
 		lsstlbr_visit_cmd.small_icon = "./tb_icons/tlbr_www_16.png"
 		lsstlbr_visit_cmd.large_icon = "./tb_icons/tlbr_www_24.png"
 		lsstlbr_visit_cmd.tooltip = $lsstoolbarStrings.GetString("Click to visit LSS Toolbar website")
+		$lssMenu.add_separator
+		$lssToolbar.add_separator
 		$lssToolbar.add_item(lsstlbr_visit_cmd)
 		$lssMenu.add_item(lsstlbr_visit_cmd)  
 
@@ -115,10 +119,19 @@ class Lss_Common_Cmds
 			about_str+="E-mail1: designer@ls-software.ru\n"
 			about_str+="E-mail2: kirill2007_77@mail.ru\n"
 			about_str+="icq: 328-958-369\n"
-			about_str+="\n\n(C) Links System Software 2012"
+			about_str+="(C) Links System Software 2012\n"
+			about_str+="\nThird Party Components\n"
+			about_str+="jsDraw2D (Graphics Library for JavaScript) Beta 1.1.0 (17-August-2009) (Uncompressed)\n"
+			about_str+="(c)Sameer Burle Copyright 2009:	 jsFiction.com \n"
+			about_str+="Distributed under GNU LGPL. See http://gnu.org/licenses/lgpl.html for details.\n"
+			about_str+="\njscolor, JavaScript Color Picker, version 1.3.13\n"
+			about_str+="(c) Jan Odvarko, http://odvarko.cz\n"
+			about_str+="Distributed under GNU LGPL. See http://gnu.org/licenses/lgpl.html for details.\n"
+			about_str+="\ndhtmlxSlider v.3.0 Standard edition build 110707\n"
+			about_str+="Copyright DHTMLX LTD. http://www.dhtmlx.com\n"
+			about_str+="Distributed under GNU GPL. See http://gnu.org/licenses/gpl.html for details.\n"
 			UI.messagebox(about_str,MB_MULTILINE,"LSS Toolbar")
 		}
-		$lssMenu.add_separator
 		$lssMenu.add_item(lsstlbr_about_cmd)
 	end
 	

@@ -60,6 +60,8 @@ class Lss_Pnts2mesh_Entity
 	attr_accessor :calculation_complete
 	# Other
 	attr_accessor :make_show_tool
+	attr_accessor :select_result_surface
+	attr_accessor :select_nodal_pts_arr
 	
 	def initialize
 		# Input Data
@@ -93,6 +95,9 @@ class Lss_Pnts2mesh_Entity
 		# Timer
 		@finish_timer=false
 		@calculation_complete=false
+		# Other
+		@select_result_surface=false
+		@select_nodal_pts_arr=nil
 		
 		@model=Sketchup.active_model
 		@entities=@model.active_entities
@@ -542,10 +547,20 @@ class Lss_Pnts2mesh_Entity
 	end
 	
 	def generate_nodal_c_points
+		selection=Sketchup.active_model.selection
 		@nodal_c_points=Array.new
 		@nodal_points.each{|pt|
 			nodal_c_pt=@entities.add_cpoint(pt)
 			@nodal_c_points<<nodal_c_pt
+			if @select_nodal_pts_arr
+				if @select_nodal_pts_arr.length>0
+					@select_nodal_pts_arr.each{|sel_pt|
+						if sel_pt==pt
+							selection.add(nodal_c_pt)
+						end
+					}
+				end
+			end
 		}
 	end
 	
@@ -625,6 +640,8 @@ class Lss_Pnts2mesh_Entity
 			param =12 if @soft_surf=="true" and @smooth_surf=="true"
 			@result_surface.entities.add_faces_from_mesh(surf_mesh, param)
 		end
+		selection=Sketchup.active_model.selection
+		selection.add(@result_surface) if @select_result_surface
 		Sketchup.status_text = ""
 	end
 	
@@ -779,6 +796,8 @@ class Lss_Pnts2mesh_Refresh
 			set_of_obj<<obj
 		}
 		lss_pnts2mesh_attr_dicts=Array.new
+		sel_array=Array.new
+		sel_pts_array=Array.new
 		set_of_obj.each{|ent|
 			if not(ent.deleted?)
 				if ent.typename=="ConstructionPoint"
@@ -786,6 +805,7 @@ class Lss_Pnts2mesh_Refresh
 						ent.attribute_dictionaries.each{|attr_dict|
 							if attr_dict.name.split("_")[0]=="lsspnts2mesh"
 								lss_pnts2mesh_attr_dicts+=[attr_dict.name]
+								sel_pts_array<<[attr_dict.name, ent.position]
 							end
 						}
 					end
@@ -795,6 +815,7 @@ class Lss_Pnts2mesh_Refresh
 						ent.attribute_dictionaries.each{|attr_dict|
 							if attr_dict.name.split("_")[0]=="lsspnts2mesh"
 								lss_pnts2mesh_attr_dicts+=[attr_dict.name]
+								sel_array<<attr_dict.name
 								@selection.remove(ent)
 							end
 						}
@@ -836,6 +857,22 @@ class Lss_Pnts2mesh_Refresh
 							
 							@pnts2mesh_entity.perform_pre_calc
 							self.clear_previous_results(lss_pnts2mesh_attr_dict_name)
+							if sel_array.length>0
+								sel_array.each{|sel_dict_name|
+									@pnts2mesh_entity.select_result_surface=true if sel_dict_name==lss_pnts2mesh_attr_dict_name
+								}
+							end
+							if sel_pts_array.length>0
+								sel_pts_arr=Array.new
+								sel_pts_array.each{|sel_dict_name_pt|
+									sel_dict_name=sel_dict_name_pt[0]
+									pt=sel_dict_name_pt[1]
+									if sel_dict_name==lss_pnts2mesh_attr_dict_name
+										sel_pts_arr<<pt
+									end
+								}
+								@pnts2mesh_entity.select_nodal_pts_arr=sel_pts_arr
+							end
 							@pnts2mesh_entity.generate_results
 						end
 					end
@@ -1016,6 +1053,7 @@ class Lss_Pnts2mesh_Tool
 					if @pick_state=="point_pt"
 						last_pt=@nodal_points.pop
 					end
+					self.make_pnts2mesh_entity
 					@pnts2mesh_entity.generate_results
 					self.write_defaults
 					self.reset(view)
