@@ -507,7 +507,7 @@ class Lss_Mshstick_Entity
 			param =4 if @soft_surf=="true" and @smooth_surf=="false"
 			param =8 if @soft_surf=="false" and @smooth_surf=="true"
 			param =12 if @soft_surf=="true" and @smooth_surf=="true"
-			@result_group.entities.add_faces_from_mesh(result_mesh, param)
+			@result_group.entities.add_faces_from_mesh(result_mesh, param, @result_mats.first[0], @result_mats.first[1])
 		end
 		selection=Sketchup.active_model.selection
 		selection.add(@result_group) if @select_result_grp
