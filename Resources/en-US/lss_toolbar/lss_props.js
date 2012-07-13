@@ -86,6 +86,11 @@ function build_props_list(){
 			dict_div.appendChild(tool_img);
 			dict_div.innerHTML+="&nbsp;'3D Mesh' Entity";
 			break;
+			case "lssctrlpnts":
+			tool_img.src="images/buttons/ctrlpnts_24.gif";
+			dict_div.appendChild(tool_img);
+			dict_div.innerHTML+="&nbsp;'Control Points' Entity";
+			break;
 			case "lssmshstick":
 			tool_img.src="images/buttons/mshstick_24.gif";
 			dict_div.appendChild(tool_img);
