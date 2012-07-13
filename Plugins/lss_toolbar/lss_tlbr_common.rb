@@ -200,6 +200,13 @@ class Lss_Properties_Dialog
 		
 		# Attach an action callback
 		@properties_dialog.add_action_callback("get_data") do |web_dialog,action_name|
+			if action_name=="reset"
+				resource_dir = File.dirname(Sketchup.get_resource_path("lss_toolbar.strings"))
+				html_path = "#{resource_dir}/lss_toolbar/properties.html"
+				@properties_dialog.set_file(html_path)
+				self.send_props2dlg
+				@properties_dialog.show()
+			end
 			if action_name=="get_props" # From Ruby to web-dialog
 				self.send_props2dlg
 			end
@@ -211,7 +218,20 @@ class Lss_Properties_Dialog
 				setting_name=action_name.split(",")[2]
 				setting_val=action_name.split(",")[3]
 				setting_dict=@selection[0].attribute_dictionaries[setting_dict_name]
-				setting_dict[setting_name]=setting_val
+				prop_type=Sketchup.read_default("LSS_Prop_Types", setting_name)
+				case prop_type
+					when "distance"
+					dist=Sketchup.parse_length(setting_val)
+					setting_dict[setting_name]=dist
+					when "integer"
+					int=setting_val.to_i
+					setting_dict[setting_name]=int
+					when "float"
+					fl=setting_val.to_f
+					setting_dict[setting_name]=fl
+					else
+					setting_dict[setting_name]=setting_val
+				end
 				if @selection[0].typename=="Edge"
 					curve=@selection[0].curve
 					if curve
@@ -262,7 +282,21 @@ class Lss_Properties_Dialog
 		@selection[0].attribute_dictionaries.each{|dict|
 			dict.each_key{|key|
 				if dict[key]
-					prop_str=dict.name + "|" + key + "|" + dict[key].to_s
+					name_alias=$lsstoolbarStrings.GetString(key)
+					prop_type=Sketchup.read_default("LSS_Prop_Types", key)
+					prop_type="" if prop_type.nil?
+					case prop_type
+						when "distance"
+						dist=Sketchup.format_length(dict[key].to_f).to_s
+						prop_str=dict.name + "|" + key + "|" + dist + "|" + name_alias + "|" + prop_type
+						when "color"
+						hex_str=dict[key].to_s(16).upcase
+						prop_str=dict.name + "|" + key + "|" + hex_str + "|" + name_alias + "|" + prop_type
+						when "vector"
+						prop_str=dict.name + "|" + key + "|" + dict[key].to_s + "|" + name_alias + "|" + prop_type
+						else
+						prop_str=dict.name + "|" + key + "|" + dict[key].to_s + "|" + name_alias + "|" + prop_type
+					end
 					js_command = "get_property('" + prop_str + "')" if prop_str
 					@properties_dialog.execute_script(js_command) if js_command
 				end

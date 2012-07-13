@@ -261,7 +261,7 @@ class Lss_Recursive_Entity
 				end
 			end
 		}
-		status = @model.start_operation($lsstoolbarStrings.GetString("LSS Making Recursive..."))
+		status = @model.start_operation($lsstoolbarStrings.GetString("LSS Make Recursive"))
 		if has_ents
 			root_copy=@root_group.copy
 			defn=root_copy.entities.parent
@@ -492,6 +492,13 @@ class Lss_Recursive_Tool
 		self.settings2hash
 		@settings_hash.each_key{|key|
 			Sketchup.write_default("LSS_Recursive", key, @settings_hash[key][0].to_s)
+		}
+		self.write_prop_types # Added 13-Jul-12
+	end
+	
+	def write_prop_types # Added 13-Jul-12
+		@settings_hash.each_key{|key|
+			Sketchup.write_default("LSS_Prop_Types", key, @settings_hash[key][1])
 		}
 	end
 	

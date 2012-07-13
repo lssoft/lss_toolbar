@@ -696,9 +696,17 @@ class Lss_Blend_Tool
 		@transp_level=@settings_hash["transp_level"][0]
 	end
 	
-	def blend_write_defaults
+	def write_defaults
+		self.settings2hash
 		@settings_hash.each_key{|key|
-			Sketchup.write_default("LSS_Blend", key, @settings_hash[key][0].to_s)
+			Sketchup.write_default("LSS_Recursive", key, @settings_hash[key][0].to_s)
+		}
+		self.write_prop_types # Added 13-Jul-12
+	end
+	
+	def write_prop_types # Added 13-Jul-12
+		@settings_hash.each_key{|key|
+			Sketchup.write_default("LSS_Prop_Types", key, @settings_hash[key][1])
 		}
 	end
 	
@@ -718,7 +726,7 @@ class Lss_Blend_Tool
 				if @blend_entity
 					@blend_entity.generate_results
 				else
-					UI.messagbox($lsstoolbarStrings.GetString("Pick 2 appropriate entities before launching 'Apply'"))
+					UI.messagbox($lsstoolbarStrings.GetString("Pick 2 appropriate entities before clicking 'Apply'"))
 				end
 			end
 			if action_name=="pick_first_ent"

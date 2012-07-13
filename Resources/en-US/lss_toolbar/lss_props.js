@@ -10,10 +10,23 @@ function get_property(prop_str){
 	var dict=prop[0];
 	var prop_name=prop[1];
 	var prop_val=prop[2];
-	prop_dicts[dict].push([prop_name, prop_val]);
+	var name_alias=prop[3];
+	var prop_type=prop[4];
+	if (name_alias=="") {
+		name_alias=prop_name;
+	}
+	prop_dicts[dict].push([prop_name, prop_val, name_alias, prop_type]);
 }
 
 function ctrl_onchange(evt){
+	act_name="obtain_setting"+ delimiter + this.id + delimeter + this.value;
+	callRuby(act_name);
+	load_props();
+}
+
+function color_onchange(evt){
+	delete jscolor.picker.owner;
+	document.getElementsByTagName('body')[0].removeChild(jscolor.picker.boxB);
 	act_name="obtain_setting"+ delimiter + this.id + delimeter + this.value;
 	callRuby(act_name);
 	load_props();
@@ -48,7 +61,50 @@ function build_props_list(){
 		dict_div.style.display="inline-block";
 		dict_div.style.width="90%";
 		dict_div.style.maxWidth="100%";
-		dict_div.innerHTML = dict_name;
+		dict_name_st=dict_name.split("_")[0];
+		var tool_img=document.createElement("IMG");
+		tool_img.width="24";
+		tool_img.height="24";
+		switch (dict_name_st) {
+			case "lsspathface":
+			tool_img.src="images/buttons/pathface_24.gif";
+			dict_div.appendChild(tool_img);
+			dict_div.innerHTML+="&nbsp;'2 Faces + Path' Entity";
+			break;
+			case "lssblend":
+			tool_img.src="images/buttons/blend_24.gif";
+			dict_div.appendChild(tool_img);
+			dict_div.innerHTML+="&nbsp;'Blend' Entity";
+			break;
+			case "lsscrvsmth":
+			tool_img.src="images/buttons/crvsmth_24.gif";
+			dict_div.appendChild(tool_img);
+			dict_div.innerHTML+="&nbsp;'Smoothed Curve' Entity";
+			break;
+			case "lsspnts2mesh":
+			tool_img.src="images/buttons/pnts2mesh_24.gif";
+			dict_div.appendChild(tool_img);
+			dict_div.innerHTML+="&nbsp;'3D Mesh' Entity";
+			break;
+			case "lssmshstick":
+			tool_img.src="images/buttons/mshstick_24.gif";
+			dict_div.appendChild(tool_img);
+			dict_div.innerHTML+="&nbsp;'Stick Group' Entity";
+			break;
+			case "lssvoxelate":
+			tool_img.src="images/buttons/voxelate_24.gif";
+			dict_div.appendChild(tool_img);
+			dict_div.innerHTML+="&nbsp;'Voxelate' Entity";
+			break;
+			case "lssrecursive":
+			tool_img.src="images/buttons/recursive_24.gif";
+			dict_div.appendChild(tool_img);
+			dict_div.innerHTML+="&nbsp;'Recursive' Entity";
+			break;
+			default:
+			dict_div.innerHTML = dict_name;
+			break;
+		}
 		oCaption.appendChild(dict_div);
 		oCaption.title = "Properties Dictionary Name"; 
 		oTable.appendChild(oCaption);
@@ -66,7 +122,8 @@ function build_props_list(){
 			name_div.style.display="inline-block";
 			name_div.style.width="100%";
 			name_div.style.maxWidth="100%";
-			name_div.innerHTML = props_list[i][0];
+			name_div.innerHTML = props_list[i][2];
+			name_div.title = props_list[i][2];
 			nameCell.appendChild(name_div);
 			oRow.appendChild(nameCell);
 			valCell = document.createElement("TD");
@@ -97,7 +154,13 @@ function build_props_list(){
 				val_input.setAttribute("id", field_id);
 				val_input.style.width="100%";
 				val_input.onkeydown=key_dwn_prop;
-				val_input.onchange=ctrl_onchange;
+				if (props_list[i][3]=="color") {
+					var myPicker = new jscolor.color(val_input, {})
+					val_input.onchange=color_onchange;
+				}
+				else {
+					val_input.onchange=ctrl_onchange;
+				}
 				//Append the element in page (in span).
 				valCell.appendChild(val_input);
 			}

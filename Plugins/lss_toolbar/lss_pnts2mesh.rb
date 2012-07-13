@@ -1032,7 +1032,14 @@ class Lss_Pnts2mesh_Tool
 	def write_defaults
 		self.settings2hash
 		@settings_hash.each_key{|key|
-			Sketchup.write_default("LSS_Pnts2mesh", key, @settings_hash[key][0].to_s)
+			Sketchup.write_default("LSS_Recursive", key, @settings_hash[key][0].to_s)
+		}
+		self.write_prop_types # Added 13-Jul-12
+	end
+	
+	def write_prop_types # Added 13-Jul-12
+		@settings_hash.each_key{|key|
+			Sketchup.write_default("LSS_Prop_Types", key, @settings_hash[key][1])
 		}
 	end
 	

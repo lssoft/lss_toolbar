@@ -21,6 +21,67 @@
 "End"="End";
 "Try to pick a face."="Try to pick a face.";
 "Try to pick a curve."="Try to pick a curve.";
+//lss_blend.rb
+"Blend..."="Blend...";
+"Click to activate 'Blend...' tool."="Click to activate 'Blend...' tool.";
+"LSS Blend Processing"="LSS Blend Processing";
+"Generating faces:"="Generating faces:";
+"Generating vertices tracks:"="Generating vertices tracks:";
+"Generating surface:"="Generating surface:";
+"Blend"="Blend";
+"Pick 2 appropriate entities before clicking 'Apply'"="Pick 2 appropriate entities before clicking 'Apply'";
+"It is not possible to reverse construction point."="It is not possible to reverse construction point.";
+"Entity 1"="Entity 1";
+"Entity 2"="Entity 2";
+"Try to pick an appropriate entity (face, curve, edge, construction point)."="Try to pick an appropriate entity (face, curve, edge, construction point).";
+//lss_crvsmth.rb
+"Recursively Smoothed Curve"="Recursively Smoothed Curve";
+"Click to activate 'Recursively Smoothed Curve' tool."="Click to activate 'Recursively Smoothed Curve' tool.";
+"LSS Recursively Smoothed Curve"="LSS Recursively Smoothed Curve";
+"Pick or draw curve before clicking 'Apply'"="Pick or draw curve before clicking 'Apply'";
+"Try to pick a curve."="Try to pick a curve.";
+"Finish"="Finish";
+"Close"="Close";
+"It is necessary to draw some more points before closing."="It is necessary to draw some more points before closing.";
+"Cancel Last Node"="Cancel Last Node";
+"Cancel Whole Curve"="Cancel Whole Curve";
+//lss_pnts2mesh.rb
+"Make 3D Mesh..."="Make 3D Mesh...";
+"Click to activate 'Make 3D Mesh...' tool."="Click to activate 'Make 3D Mesh...' tool.";
+"Calculating Z-levels:"="Calculating Z-levels:";
+"Performing average smoothing:"="Performing average smoothing:";
+"Performing minimize cumulative length smoothing:"="Performing minimize cumulative length smoothing:";
+"Preprocessing points:"="Preprocessing points:";
+"LSS Make 3D Mesh"="LSS Make 3D Mesh";
+"Generating result surface:"="Generating result surface:";
+"Generating horizontals:"="Generating horizontals:";
+"Draw or select some construction points before clicking 'Apply'"="Draw or select some construction points before clicking 'Apply'";
+"Finish"="Finish";
+"Cancel Last Node"="Cancel Last Node";
+"Cancel Whole Surface"="Cancel Whole Surface";
+//lss_ctrlpnts.rb
+"Control Points"="Control Points";
+"Click to activate 'Control Points' tool."="Click to activate 'Control Points' tool.";
+"Performing deformation:"="Performing deformation:";
+"Calculating deformation isolines:"="Calculating deformation isolines:";
+"LSS Control Points"="LSS Control Points";
+"Generating result group:"="Generating result group:";
+"Generating isolines:"="Generating isolines:";
+"Pick initial group and point some control points before clicking 'Apply'"="Pick initial group and point some control points before clicking 'Apply'";
+"Try to pick a group."="Try to pick a group.";
+"Finish"="Finish";
+"Cancel Last Node"="Cancel Last Node";
+"Cancel Whole"="Cancel Whole";
+//lss_mshstick.rb
+"Stick Group..."="Stick Group...";
+"Click to activate 'Stick Group...' tool."="Click to activate 'Stick Group...' tool.";
+"Performing preliminary sticking:"="Performing preliminary sticking:";
+"Shredding..."="Shredding...";
+"LSS Stick Group"="LSS Stick Group";
+"Generating result group:"="Generating result group:";
+"Results will be generated after sticking completion..."="Results will be generated after sticking completion...";
+"Pick initial group before clicking 'Apply'"="Pick initial group before clicking 'Apply'";
+"Try to pick a group."="Try to pick a group.";
 //lss_voxelate.rb
 "Voxelate"="Voxelate";
 "Click to activate 'Voxelate' tool."="Click to activate 'Voxelate' tool.";
@@ -37,3 +98,99 @@
 "Pick group before clicking 'Apply'"="Pick group before clicking 'Apply'";
 "Try to pick a group."="Try to pick a group.";
 "Try to pick a component instance."="Try to pick a component instance.";
+//lss_recursive.rb
+"Make Recursive..."="Make Recursive...";
+"Click to activate 'Make Recursive...' tool."="Click to activate 'Make Recursive...' tool.";
+"Performing recursive copying:"="Performing recursive copying:";
+"LSS Make Recursive"="LSS Make Recursive";
+"Pick group before clicking 'Apply'"="Pick group before clicking 'Apply'";
+"Try to pick a group."="Try to pick a group.";
+//lss_tlbr_common.rb
+"Refresh"="Refresh";
+"It is necessary to select any object, made with LSS Toolbar."="It is necessary to select any object, made with LSS Toolbar.";
+"There are no LSS Toolbar objects detected in selection."="There are no LSS Toolbar objects detected in selection.";
+"Select LSS object(s), then click this button to refresh."="Select LSS object(s), then click this button to refresh.";
+"Observe Changes..."="Observe Changes...";
+"Click to toggle 'LSS Matrix' observer state."="Click to toggle 'LSS Matrix' observer state.";
+"Edit Entity Properties..."="Edit Entity Properties...";
+"It is necessary to select an entity to view/edit its properties."="It is necessary to select an entity to view/edit its properties.";
+"There are "="There are ";
+" entities selected. Properties dialog shows only one entity properties."=" entities selected. Properties dialog shows only one entity properties.";
+"The selected entity has no editable properties."="The selected entity has no editable properties.";
+"Editing properties of selected entity causes imediate properties updates."="Editing properties of selected entity causes imediate properties updates.";
+"Select an entity, then click to view/edit its properties."="Select an entity, then click to view/edit its properties.";
+"Visit Program Website..."="Visit Program Website...";
+"Click to visit LSS Toolbar website"="Click to visit LSS Toolbar website";
+"About..."="About...";
+"There are no LSS Toolbar objects detected in selection."="There are no LSS Toolbar objects detected in selection.";
+"Properties"="Properties";
+"There are no LSS Toolbar objects detected in selection."="There are no LSS Toolbar objects detected in selection.";
+" entities selected. Properties dialog shows only one entity properties."=" entities selected. Properties dialog shows only one entity properties.";
+"It is necessary to select an entity to view/edit its properties."="It is necessary to select an entity to view/edit its properties.";
+//Aliases of properties names
+"inst_type"="Entity type";
+"inst_time"="Creation time";
+"entity_type"="Entity type";
+"soft_surf"="Soft surface";
+"smooth_surf"="Smooth surface";
+//lss_pathface.rb, lss_blend.rb
+"first_face"="First face";
+"second_face"="Second face";
+"path_curve"="Path curve";
+"generate_faces"="Generate faces";
+"generate_surf"="Generate surface";
+"generate_tracks"="Generate tracks";
+"align2path"="Align to path";
+"center2path"="Center to path";
+"cap_start"="Cap start";
+"cap_end"="Cap end";
+"first_ent"="First entity";
+"second_ent"="Second entity";
+"steps_cnt"="Steps count";
+"generate_steps"="Generate steps";
+//lss_crvsmth.rb
+"pt_ind"="Node index";
+"iterations_cnt"="Iterations count";
+"leave_initial"="Leave init. curve";
+"show_expl_lines"="Show explanation lines";
+"curve_closed"="Closed curve";
+//lss_pnts2mesh.rb, lss_ctrlpnts.rb
+"cells_x_cnt"="Cells X count";
+"cells_y_cnt"="Cells Y count";
+"calc_alg"="Algorithm type";
+"average_times"="Averaging times count";
+"minimize_times"="Minimizing times count";
+"power"="Power";
+"draw_horizontals"="Draw horizontals";
+"draw_gradient"="Draw gradient";
+"horizontals_step"="Horizontals step";
+"horizontals_origin"="Horizontals origin";
+"max_color"="MAX gradient color";
+"min_color"="MIN gradient color";
+"init_pos"="Initial position";
+"scale_coeff"="Scale coefficient";
+"hide_initial"="Hide initial group";
+"draw_isolines"="Draw isolines";
+"c_obj_type"="Controlling object type";
+//lss_mshstick.rb
+"stick_dir"="Sticking direction";
+"stick_vec"="Sticking vector";
+"stick_type"="Sticking type";
+"shred"="Shred";
+"bounce_dir"="Bouncing direction";
+"bounce_vec"="Bouncing vector";
+"offset_dist"="Offset distance";
+"magnify"="Magnify level";
+//lss_voxelate.rb
+"voxel_type"="Voxel type";
+"voxel_x_size"="Voxel X size";
+"voxel_y_size"="Voxel Y size";
+"voxel_z_size"="Voxel Z size";
+"uniform_size"="Uniform size";
+"lock_sizes"="Lock sizes";
+"use_comp_size"="Use component sizes";
+"fill_with_voxels"="Fill with voxels";
+"show_voxelating"="Show voxelating process";
+//lss_recursive.rb
+"recursive_depth"="Depth of recursion";
+"show_recursive"="Show processing";

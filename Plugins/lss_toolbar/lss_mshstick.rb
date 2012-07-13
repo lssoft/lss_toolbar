@@ -467,7 +467,7 @@ class Lss_Mshstick_Entity
 			@queue_results_generation=true
 			return
 		end
-		status = @model.start_operation($lsstoolbarStrings.GetString("LSS Stick Group..."))
+		status = @model.start_operation($lsstoolbarStrings.GetString("LSS Stick Group"))
 		self.generate_result_group
 		@lss_mshstick_dict="lssmshstick" + "_" + Time.now.to_f.to_s
 		self.store_settings
@@ -1012,7 +1012,14 @@ class Lss_Mshstick_Tool
 	def write_defaults
 		self.settings2hash
 		@settings_hash.each_key{|key|
-			Sketchup.write_default("LSS_Mshstick", key, @settings_hash[key][0].to_s)
+			Sketchup.write_default("LSS_Recursive", key, @settings_hash[key][0].to_s)
+		}
+		self.write_prop_types # Added 13-Jul-12
+	end
+	
+	def write_prop_types # Added 13-Jul-12
+		@settings_hash.each_key{|key|
+			Sketchup.write_default("LSS_Prop_Types", key, @settings_hash[key][1])
 		}
 	end
 	

@@ -15,7 +15,7 @@ require 'sketchup.rb'
 require 'extensions.rb'
 require 'LangHandler.rb'
 
-$lsstoolbarStrings = LanguageHandler.new("lsstlbr.strings")
+$lsstoolbarStrings = LanguageHandler.new("lss_toolbar.strings")
 
 lsstlbr_ext = SketchupExtension.new($lsstoolbarStrings.GetString("LSS Toolbar"), "lss_toolbar/lss_tlbr_loader.rb")
 
