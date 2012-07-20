@@ -513,7 +513,7 @@ class Lss_Voxelate_Tool
 	end
 	
 	def settings2hash
-		@settings_hash["voxel_type"]=[@voxel_type, "string"]
+		@settings_hash["voxel_type"]=[@voxel_type, "list"]
 		@settings_hash["voxel_x_size"]=[@voxel_x_size, "distance"]
 		@settings_hash["voxel_y_size"]=[@voxel_y_size, "distance"]
 		@settings_hash["voxel_z_size"]=[@voxel_z_size, "distance"]
@@ -548,6 +548,7 @@ class Lss_Voxelate_Tool
 	def write_prop_types # Added 13-Jul-12
 		@settings_hash.each_key{|key|
 			Sketchup.write_default("LSS_Prop_Types", key, @settings_hash[key][1])
+			Sketchup.active_model.set_attribute("LSS_Prop_Types", key, @settings_hash[key][1])
 		}
 	end
 	

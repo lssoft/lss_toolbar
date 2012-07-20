@@ -1,0 +1,123 @@
+//LSS Toolbar extension resource file
+//Links System Software (c)2012
+//Aliases of properties names
+"inst_type"="Entity type";
+"inst_time"="Creation time";
+"entity_type"="Entity type";
+"soft_surf"="Soft surface";
+"smooth_surf"="Smooth surface";
+//lss_pathface.rb, lss_blend.rb
+"first_face"="First face";
+"second_face"="Second face";
+"path_curve"="Path curve";
+"generate_faces"="Generate faces";
+"generate_surf"="Generate surface";
+"generate_tracks"="Generate tracks";
+"align2path"="Align to path";
+"center2path"="Center to path";
+"cap_start"="Cap start";
+"cap_end"="Cap end";
+"first_ent"="First entity";
+"second_ent"="Second entity";
+"steps_cnt"="Steps count";
+"generate_steps"="Generate steps";
+//lss_crvsmth.rb
+"pt_ind"="Node index";
+"iterations_cnt"="Iterations count";
+"leave_initial"="Leave init. curve";
+"show_expl_lines"="Show explanation lines";
+"curve_closed"="Closed curve";
+//lss_pnts2mesh.rb, lss_ctrlpnts.rb
+"cells_x_cnt"="Cells X count";
+"cells_y_cnt"="Cells Y count";
+"calc_alg"="Algorithm type";
+"average_times"="Averaging times count";
+"minimize_times"="Minimizing times count";
+"power"="Power";
+"draw_horizontals"="Draw horizontals";
+"draw_gradient"="Draw gradient";
+"horizontals_step"="Horizontals step";
+"horizontals_origin"="Horizontals origin";
+"max_color"="MAX gradient color";
+"min_color"="MIN gradient color";
+"init_pos"="Initial position";
+"scale_coeff"="Scale coefficient";
+"hide_initial"="Hide initial group";
+"draw_isolines"="Draw isolines";
+"c_obj_type"="Controlling object type";
+//lss_mshstick.rb
+"stick_dir"="Sticking direction";
+"stick_vec"="Sticking vector";
+"stick_type"="Sticking type";
+"shred"="Shred";
+"bounce_dir"="Bouncing direction";
+"bounce_vec"="Bouncing vector";
+"offset_dist"="Offset distance";
+"magnify"="Magnify level";
+//lss_fllwedgs.rb
+"align_joint_comp"="Align joint component";
+"ignore_hidden_edgs"="Ignore hidden edges";
+"joint_size"="Joint size";
+"joint_type"="Joint type";
+"align_face"="Align face";
+"offset_from_surf"="Offset from surface";
+//lss_voxelate.rb
+"voxel_type"="Voxel type";
+"voxel_x_size"="Voxel X size";
+"voxel_y_size"="Voxel Y size";
+"voxel_z_size"="Voxel Z size";
+"uniform_size"="Uniform size";
+"lock_sizes"="Lock sizes";
+"use_comp_size"="Use component sizes";
+"fill_with_voxels"="Fill with voxels";
+"show_voxelating"="Show voxelating process";
+//lss_recursive.rb
+"recursive_depth"="Depth of recursion";
+"show_recursive"="Show processing";
+//list localized strings
+"distance,average,minimize"="distance,average,minimize";
+"world,local"="world,local";
+"c_point,axes_comp"="construction point,axes component";
+"back_bounce,normal_bounce,custom_bounce"="back bounce,normal bounce,custom bounce";
+"down,up,left,right,back,front,custom"="down,up,left,right,back,front,custom";
+"normal_stick,super_stick"="normal,super";
+"voxel,c_point,comp_inst"="voxel,const. point,comp. inst.";
+"basic,cone"="basic,cone";
+//entity types
+"root_group"="root group";
+"results_group"="results group";
+"nested_group"="nested group";
+"result_curve"="result curve";
+"nodal_c_point"="nodal point";
+"first_adj_c_pt"="first adjustment point";
+"last_adj_c_pt"="last adjustment point";
+"first_adj_c_line"="first adjustment line";
+"last_adj_c_line"="last adjustment line";
+"init_curve_group"="initial curve group";
+"expl_lines_group"="explanation lines group";
+"voxels_group"="group of voxels";
+"group2voxelate"="voxelation source group";
+"voxel_inst"="voxel component instance";
+"first_face"="first face";
+"second_face"="second face";
+"path_curve"="path curve";
+"faces_group"="group of faces";
+"tracks_group"="group of vertices tracks";
+"surface_group"="surface group";
+"first_ent"="first entity";
+"second_ent"="second entity";
+"result_group"="result group";
+"init_group"="initial group";
+"isolines_group"="group of isolines";
+"result_surface"="result surface group";
+"horizontals_group"="group of horizontals";
+"joint_comp"="joint component";
+//list values (do not localize!)
+"list_calc_alg"="distance,average,minimize";
+"list_horizontals_origin"="world,local";
+"list_c_obj_type"="c_point,axes_comp";
+"list_bounce_dir"="back_bounce,normal_bounce,custom_bounce";
+"list_stick_dir"="down,up,left,right,back,front,custom";
+"list_stick_type"="normal_stick,super_stick";
+"list_voxel_type"="voxel,c_point,comp_inst";
+"list_joint_type"="basic,cone";

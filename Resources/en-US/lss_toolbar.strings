@@ -105,6 +105,19 @@
 "LSS Make Recursive"="LSS Make Recursive";
 "Pick group before clicking 'Apply'"="Pick group before clicking 'Apply'";
 "Try to pick a group."="Try to pick a group.";
+//lss_fllwedgs.rb
+"Follow Edges..."="Follow Edges...";
+"Click to activate 'Follow Edges...' tool."="Click to activate 'Follow Edges...' tool.";
+"Following edges:"="Following edges:";
+"Making array of edges points:"="Making array of edges points:";
+"Erasing duplicates from normals array:"="Erasing duplicates from normals array:";
+"LSS Follow Edges"="LSS Follow Edges";
+"Generating result group:"="Generating result group:";
+"Placing joint components:"="Placing joint components:";
+"Results will be generated after following completion..."="Results will be generated after following completion...";
+"Pick initial group and face before clicking 'Apply'"="Pick initial group and face before clicking 'Apply'";
+"Try to pick a component instance."="Try to pick a component instance.";
+"Try to pick a face."="Try to pick a face.";
 //lss_tlbr_common.rb
 "Refresh"="Refresh";
 "It is necessary to select any object, made with LSS Toolbar."="It is necessary to select any object, made with LSS Toolbar.";
@@ -127,70 +140,3 @@
 "There are no LSS Toolbar objects detected in selection."="There are no LSS Toolbar objects detected in selection.";
 " entities selected. Properties dialog shows only one entity properties."=" entities selected. Properties dialog shows only one entity properties.";
 "It is necessary to select an entity to view/edit its properties."="It is necessary to select an entity to view/edit its properties.";
-//Aliases of properties names
-"inst_type"="Entity type";
-"inst_time"="Creation time";
-"entity_type"="Entity type";
-"soft_surf"="Soft surface";
-"smooth_surf"="Smooth surface";
-//lss_pathface.rb, lss_blend.rb
-"first_face"="First face";
-"second_face"="Second face";
-"path_curve"="Path curve";
-"generate_faces"="Generate faces";
-"generate_surf"="Generate surface";
-"generate_tracks"="Generate tracks";
-"align2path"="Align to path";
-"center2path"="Center to path";
-"cap_start"="Cap start";
-"cap_end"="Cap end";
-"first_ent"="First entity";
-"second_ent"="Second entity";
-"steps_cnt"="Steps count";
-"generate_steps"="Generate steps";
-//lss_crvsmth.rb
-"pt_ind"="Node index";
-"iterations_cnt"="Iterations count";
-"leave_initial"="Leave init. curve";
-"show_expl_lines"="Show explanation lines";
-"curve_closed"="Closed curve";
-//lss_pnts2mesh.rb, lss_ctrlpnts.rb
-"cells_x_cnt"="Cells X count";
-"cells_y_cnt"="Cells Y count";
-"calc_alg"="Algorithm type";
-"average_times"="Averaging times count";
-"minimize_times"="Minimizing times count";
-"power"="Power";
-"draw_horizontals"="Draw horizontals";
-"draw_gradient"="Draw gradient";
-"horizontals_step"="Horizontals step";
-"horizontals_origin"="Horizontals origin";
-"max_color"="MAX gradient color";
-"min_color"="MIN gradient color";
-"init_pos"="Initial position";
-"scale_coeff"="Scale coefficient";
-"hide_initial"="Hide initial group";
-"draw_isolines"="Draw isolines";
-"c_obj_type"="Controlling object type";
-//lss_mshstick.rb
-"stick_dir"="Sticking direction";
-"stick_vec"="Sticking vector";
-"stick_type"="Sticking type";
-"shred"="Shred";
-"bounce_dir"="Bouncing direction";
-"bounce_vec"="Bouncing vector";
-"offset_dist"="Offset distance";
-"magnify"="Magnify level";
-//lss_voxelate.rb
-"voxel_type"="Voxel type";
-"voxel_x_size"="Voxel X size";
-"voxel_y_size"="Voxel Y size";
-"voxel_z_size"="Voxel Z size";
-"uniform_size"="Uniform size";
-"lock_sizes"="Lock sizes";
-"use_comp_size"="Use component sizes";
-"fill_with_voxels"="Fill with voxels";
-"show_voxelating"="Show voxelating process";
-//lss_recursive.rb
-"recursive_depth"="Depth of recursion";
-"show_recursive"="Show processing";

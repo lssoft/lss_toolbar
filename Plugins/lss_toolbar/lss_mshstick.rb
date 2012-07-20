@@ -57,6 +57,9 @@ class Lss_Mshstick_Entity
 	attr_accessor :sticking_complete
 	attr_accessor :queue_results_generation
 	attr_accessor :select_result_grp
+	attr_accessor :other_dicts_hash
+	attr_accessor :show_tool
+	attr_accessor :prev_tool_id
 	
 	def initialize
 		# Input Data
@@ -86,6 +89,9 @@ class Lss_Mshstick_Entity
 		@sticking_complete=false
 		@queue_results_generation=false
 		@select_result_grp=false
+		@other_dicts_hash=nil
+		@show_tool=nil
+		@prev_tool_id=nil
 
 		@model=Sketchup.active_model
 		@entities=@model.active_entities
@@ -114,8 +120,8 @@ class Lss_Mshstick_Entity
 			if @stick_vec.is_a?(Geom::Vector3d)
 				@stick_vec=Geom::Vector3d.new(@stick_vec)
 			else
-				@stick_vec=@stick_vec.to_s
-				crd_str_arr=@stick_vec.split(",")
+				#~ @stick_vec=@stick_vec.to_s
+				crd_str_arr=@stick_vec.split(";")
 				if crd_str_arr.length==3
 					crd_arr=Array.new
 					crd_str_arr.each{|crd_str|
@@ -305,7 +311,7 @@ class Lss_Mshstick_Entity
 					offset_vec.length=@offset_dist.to_f if offset_vec.length>0
 				else
 					@bounce_vec=@bounce_vec.to_s
-					crd_str_arr=@bounce_vec.split(",")
+					crd_str_arr=@bounce_vec.split(";")
 					if crd_str_arr.length==3
 						crd_arr=Array.new
 						crd_str_arr.each{|crd_str|
@@ -463,6 +469,7 @@ class Lss_Mshstick_Entity
 	end
 	
 	def generate_results
+		@entities=@init_group.parent.entities if @init_group # Very important addition!
 		if @sticking_complete==false
 			@queue_results_generation=true
 			return
@@ -472,6 +479,65 @@ class Lss_Mshstick_Entity
 		@lss_mshstick_dict="lssmshstick" + "_" + Time.now.to_f.to_s
 		self.store_settings
 		status = @model.commit_operation
+		
+		#Enforce refreshing of other lss objects if any
+		@result_group.attribute_dictionaries.each{|dict|
+			if dict.name!=@lss_mshstick_dict
+				case dict.name.split("_")[0]
+					when "lssfllwedgs"
+					fllwedgs_refresh=Lss_Fllwedgs_Refresh.new
+					fllwedgs_refresh.enable_show_tool=false # It's necessary because some other refresh classes also use show tool and active tool changes causes crash, so it's necessary to supress at least one show tool
+					fllwedgs_refresh.refresh_given_obj(dict.name)
+				end
+			end
+		}
+		if @show_tool and @model.active_entities==@entities
+			#~ 21013 = 3DTextTool
+			#~ 21065 = ArcTool
+			#~ 21096 = CircleTool
+			#~ 21013 = ComponentTool
+			#~ 21126 = ComponentCSTool
+			#~ 21019 = EraseTool
+			#~ 21031 = FreehandTool
+			#~ 21525 = ExtrudeTool
+			#~ 21126 = SketchCSTool
+			#~ 21048 = MoveTool
+			#~ 21100 = OffsetTool
+			#~ 21074 = PaintTool
+			#~ 21095 = PolyTool
+			#~ 21041 = PushPullTool
+			#~ 21094 = RectangleTool
+			#~ 21129 = RotateTool
+			#~ 21236 = ScaleTool
+			#~ 21022 = SelectionTool
+			#~ 21020 = SketchTool
+			case @prev_tool_id
+				when 21048
+				result = Sketchup.send_action "selectMoveTool:"
+				when 21129
+				result = Sketchup.send_action "selectRotateTool:"
+				when 21236
+				result = Sketchup.send_action "selectScaleTool:"
+				when 21065
+				result = Sketchup.send_action "selectArcTool:"
+				when 21096
+				result = Sketchup.send_action "selectCircleTool:"
+				when 21013
+				result = Sketchup.send_action "selectComponentTool:"
+				when 21031
+				result = Sketchup.send_action "selectFreehandTool:"
+				when 21100
+				result = Sketchup.send_action "selectOffsetTool:"
+				when 21094
+				result = Sketchup.send_action "selectRectangleTool:"
+				when 21095
+				result = Sketchup.send_action "selectPolyTool:"
+				when 21041
+				result = Sketchup.send_action "selectPushPullTool:"
+				else
+				result = Sketchup.send_action "selectSelectionTool:"
+			end
+		end
 	end
 	
 	def generate_result_group
@@ -521,15 +587,27 @@ class Lss_Mshstick_Entity
 		
 		# Store settings to the result group
 		@result_group.set_attribute(@lss_mshstick_dict, "stick_dir", @stick_dir)
-		@result_group.set_attribute(@lss_mshstick_dict, "stick_vec", @stick_vec)
+		@result_group.set_attribute(@lss_mshstick_dict, "stick_vec", @stick_vec.to_a.join(";"))
 		@result_group.set_attribute(@lss_mshstick_dict, "stick_type", @stick_type)
 		@result_group.set_attribute(@lss_mshstick_dict, "shred", @shred)
 		@result_group.set_attribute(@lss_mshstick_dict, "bounce_dir", @bounce_dir)
-		@result_group.set_attribute(@lss_mshstick_dict, "bounce_vec", @bounce_vec)
+		@result_group.set_attribute(@lss_mshstick_dict, "bounce_vec", @bounce_vec.to_a.join(";"))
 		@result_group.set_attribute(@lss_mshstick_dict, "offset_dist", @offset_dist)
 		@result_group.set_attribute(@lss_mshstick_dict, "magnify", @magnify)
 		@result_group.set_attribute(@lss_mshstick_dict, "soft_surf", @soft_surf)
 		@result_group.set_attribute(@lss_mshstick_dict, "smooth_surf", @smooth_surf)
+		
+		# Restore other attributes if any
+		if @other_dicts_hash
+			if @other_dicts_hash.length>0
+				@other_dicts_hash.each_key{|dict_name|
+					dict=@other_dicts_hash[dict_name]
+					dict.each_key{|key|
+						@result_group.set_attribute(dict_name, key, dict[key])
+					}
+				}
+			end
+		end
 		
 		# Store information in the current active model, that indicates 'LSS Mshstick Object' presence in it.
 		# It is necessary for manual and automatic refreshing of this object after its part(s) chanching.
@@ -574,6 +652,25 @@ class Lss_Mshstick_Refresh
 		}
 		# @selection.clear
 		lss_mshstick_attr_dicts.uniq!
+		
+		# Try to check if parent group is initial group of mshstick object
+		if lss_mshstick_attr_dicts.length==0
+			active_path = Sketchup.active_model.active_path
+			if active_path
+				attr_dicts=active_path.last.attribute_dictionaries
+				if attr_dicts
+					if attr_dicts.to_a.length>0
+						attr_dicts.each{|attr_dict|
+							if attr_dict.name.split("_")[0]=="lssmshstick"
+								lss_mshstick_attr_dicts+=[attr_dict.name]
+								@entities=active_path.last.parent.entities
+							end
+						}
+					end
+				end
+			end
+		end
+		
 		if lss_mshstick_attr_dicts.length>0
 			lss_mshstick_attr_dicts.each{|lss_mshstick_attr_dict_name|
 				process_grp=true
@@ -596,11 +693,37 @@ class Lss_Mshstick_Refresh
 						@mshstick_entity.magnify=@magnify
 						@mshstick_entity.soft_surf=@soft_surf
 						@mshstick_entity.smooth_surf=@smooth_surf
-					
+						other_dicts_hash=Hash.new
+						@result_group.attribute_dictionaries.each{|other_dict|
+							if other_dict.name!=lss_mshstick_attr_dict_name
+								dict_hash=Hash.new
+								other_dict.each_key{|key|
+									dict_hash[key]=other_dict[key]
+								}
+								other_dicts_hash[other_dict.name]=dict_hash
+								if other_dict.name.split("_")[0]!="lssmshstick"
+									@entities.each{|ent|
+										if ent.attribute_dictionaries.to_a.length>0
+											chk_obj_dict=ent.attribute_dictionaries[other_dict.name]
+											if chk_obj_dict
+												if chk_obj_dict["entity_type"]=="result_group"
+													fllwedges_res=ent
+													fllwedges_res.visible=false
+												end
+											end
+										end
+									}
+								end
+							end
+						}
+						@mshstick_entity.other_dicts_hash=other_dicts_hash
 						self.clear_previous_results(lss_mshstick_attr_dict_name)
 						show_tool=Lss_Show_Sticking_Tool.new
 						show_tool.mshstick_entity=@mshstick_entity
 						show_tool.init_group=@init_group
+						@mshstick_entity.show_tool=show_tool
+						prev_tool_id=@model.tools.active_tool_id
+						@mshstick_entity.prev_tool_id=prev_tool_id
 						Sketchup.active_model.select_tool(show_tool)
 						@mshstick_entity.perform_pre_stick
 						if sel_array.length>0
@@ -711,7 +834,8 @@ class Lss_Show_Sticking_Tool
 				view.draw_line(@init_pt, @bounce_pt)
 			end
 			if @mshstick_entity.sticking_complete
-				Sketchup.active_model.select_tool(nil)
+				tools=Sketchup.active_model.tools
+				show_tool=tools.pop_tool
 			end
 		end
 	end
@@ -950,12 +1074,12 @@ class Lss_Mshstick_Tool
 	end
 	
 	def settings2hash
-		@settings_hash["stick_dir"]=[@stick_dir, "string"]
-		@settings_hash["stick_vec"]=[@stick_vec.to_a.join(","), "vector_str"]
-		@settings_hash["stick_type"]=[@stick_type, "string"]
+		@settings_hash["stick_dir"]=[@stick_dir, "list"]
+		@settings_hash["stick_vec"]=[@stick_vec.to_a.join(";"), "vector_str"]
+		@settings_hash["stick_type"]=[@stick_type, "list"]
 		@settings_hash["shred"]=[@shred, "boolean"]
-		@settings_hash["bounce_dir"]=[@bounce_dir, "string"]
-		@settings_hash["bounce_vec"]=[@bounce_vec.to_a.join(","), "vector_str"]
+		@settings_hash["bounce_dir"]=[@bounce_dir, "list"]
+		@settings_hash["bounce_vec"]=[@bounce_vec.to_a.join(";"), "vector_str"]
 		@settings_hash["offset_dist"]=[@offset_dist, "distance"]
 		@settings_hash["magnify"]=[@magnify, "float"]
 		@settings_hash["soft_surf"]=[@soft_surf, "boolean"]
@@ -1020,6 +1144,7 @@ class Lss_Mshstick_Tool
 	def write_prop_types # Added 13-Jul-12
 		@settings_hash.each_key{|key|
 			Sketchup.write_default("LSS_Prop_Types", key, @settings_hash[key][1])
+			Sketchup.active_model.set_attribute("LSS_Prop_Types", key, @settings_hash[key][1])
 		}
 	end
 	

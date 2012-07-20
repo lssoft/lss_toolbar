@@ -62,6 +62,7 @@ class Lss_Pnts2mesh_Entity
 	attr_accessor :make_show_tool
 	attr_accessor :select_result_surface
 	attr_accessor :select_nodal_pts_arr
+	attr_accessor :other_dicts_hash
 	
 	def initialize
 		# Input Data
@@ -98,6 +99,8 @@ class Lss_Pnts2mesh_Entity
 		# Other
 		@select_result_surface=false
 		@select_nodal_pts_arr=nil
+		@other_dicts_hash=nil
+		@prev_tool_id=nil
 		
 		@model=Sketchup.active_model
 		@entities=@model.active_entities
@@ -418,6 +421,7 @@ class Lss_Pnts2mesh_Entity
 	
 	def pre_calc_horizontals
 		return if @result_surface_points.nil?
+		return if @horizontals_step==0
 		@horizontal_points=Array.new
 		step_offset_vec=Geom::Vector3d.new(0,0,1)
 		bb=Geom::BoundingBox.new
@@ -512,6 +516,7 @@ class Lss_Pnts2mesh_Entity
 			}
 			when "minimize"
 			if @make_show_tool
+				@prev_tool_id=@model.tools.active_tool_id
 				show_tool=Lss_Show_Process_Tool.new
 				Sketchup.active_model.select_tool(show_tool)
 			end
@@ -529,7 +534,19 @@ class Lss_Pnts2mesh_Entity
 					self.pre_calc_horizontals if @draw_horizontals=="true"
 					self.generation_proc
 					if @make_show_tool
-						Sketchup.active_model.select_tool(nil)
+						#~ 21048 = MoveTool
+						#~ 21129 = RotateTool
+						#~ 21236 = ScaleTool
+						case @prev_tool_id
+							when 21048
+							result = Sketchup.send_action "selectMoveTool:"
+							when 21129
+							result = Sketchup.send_action "selectRotateTool:"
+							when 21236
+							result = Sketchup.send_action "selectScaleTool:"
+							else
+							Sketchup.active_model.select_tool(nil)
+						end
 					end
 				end
 			}
@@ -544,6 +561,16 @@ class Lss_Pnts2mesh_Entity
 		self.generate_horizontals_group if @draw_horizontals=="true"
 		self.store_settings
 		status = @model.commit_operation
+		@result_surface.attribute_dictionaries.each{|dict|
+			if dict.name!=@lss_pnts2mesh_dict
+				case dict.name.split("_")[0]
+					when "lssfllwedgs"
+					fllwedgs_refresh=Lss_Fllwedgs_Refresh.new
+					fllwedgs_refresh.enable_show_tool=false # It's necessary because some other refresh classes also use show tool and active tool changes causes crash, so it's necessary to supress at least one show tool
+					fllwedgs_refresh.refresh_given_obj(dict.name)
+				end
+			end
+		}
 	end
 	
 	def generate_nodal_c_points
@@ -695,6 +722,18 @@ class Lss_Pnts2mesh_Entity
 		@model.set_attribute("lss_toolbar_objects", "lss_pnts2mesh", "present")
 		# It is a bit dangerous approach, but for now looks like it's worth of it
 		@model.set_attribute("lss_toolbar_refresh_cmds", "lss_pnts2mesh", "(Lss_Pnts2mesh_Refresh.new).refresh")
+		
+		# Restore other attributes if any
+		if @other_dicts_hash
+			if @other_dicts_hash.length>0
+				@other_dicts_hash.each_key{|dict_name|
+					dict=@other_dicts_hash[dict_name]
+					dict.each_key{|key|
+						@result_surface.set_attribute(dict_name, key, dict[key])
+					}
+				}
+			end
+		end
 	end
 end #class Lss_Pnts2mesh_Entity
 
@@ -856,6 +895,17 @@ class Lss_Pnts2mesh_Refresh
 							@pnts2mesh_entity.make_show_tool=true if lss_pnts2mesh_attr_dicts.length==1 # To enable surface processing show
 							
 							@pnts2mesh_entity.perform_pre_calc
+							other_dicts_hash=Hash.new
+							@result_surface.attribute_dictionaries.each{|other_dict|
+								if other_dict.name!=lss_pnts2mesh_attr_dict_name
+									dict_hash=Hash.new
+									other_dict.each_key{|key|
+										dict_hash[key]=other_dict[key]
+									}
+									other_dicts_hash[other_dict.name]=dict_hash
+								end
+							}
+							@pnts2mesh_entity.other_dicts_hash=other_dicts_hash
 							self.clear_previous_results(lss_pnts2mesh_attr_dict_name)
 							if sel_array.length>0
 								sel_array.each{|sel_dict_name|
@@ -995,7 +1045,7 @@ class Lss_Pnts2mesh_Tool
 	def settings2hash
 		@settings_hash["cells_x_cnt"]=[@cells_x_cnt, "integer"]
 		@settings_hash["cells_y_cnt"]=[@cells_y_cnt, "integer"]
-		@settings_hash["calc_alg"]=[@calc_alg, "string"]
+		@settings_hash["calc_alg"]=[@calc_alg, "list"]
 		@settings_hash["average_times"]=[@average_times, "integer"]
 		@settings_hash["minimize_times"]=[@minimize_times, "integer"]
 		@settings_hash["power"]=[@power, "real"]
@@ -1006,7 +1056,7 @@ class Lss_Pnts2mesh_Tool
 		@settings_hash["max_color"]=[@max_color, "color"]
 		@settings_hash["min_color"]=[@min_color, "color"]
 		@settings_hash["horizontals_step"]=[@horizontals_step, "distance"]
-		@settings_hash["horizontals_origin"]=[@horizontals_origin, "string"]
+		@settings_hash["horizontals_origin"]=[@horizontals_origin, "list"]
 		@settings_hash["transp_level"]=[@transp_level, "integer"]
 	end
 	
@@ -1040,6 +1090,7 @@ class Lss_Pnts2mesh_Tool
 	def write_prop_types # Added 13-Jul-12
 		@settings_hash.each_key{|key|
 			Sketchup.write_default("LSS_Prop_Types", key, @settings_hash[key][1])
+			Sketchup.active_model.set_attribute("LSS_Prop_Types", key, @settings_hash[key][1])
 		}
 	end
 	

@@ -52,6 +52,8 @@ class Lss_Ctrlpnts_Entity
 	# Ctrlpnts entity parts
 	attr_accessor :nodal_c_points
 	attr_accessor :result_group
+	# Other
+	attr_accessor :other_dicts_hash
 	
 	def initialize
 		# Input Data
@@ -74,6 +76,8 @@ class Lss_Ctrlpnts_Entity
 		# Ctrlpnts entity parts
 		@nodal_c_points=nil
 		@result_group=nil
+		# Other
+		@other_dicts_hash=nil
 
 		@model=Sketchup.active_model
 		@entities=@model.active_entities
@@ -270,18 +274,33 @@ class Lss_Ctrlpnts_Entity
 	end
 	
 	def generate_results
+		@entities=@init_group.parent.entities if @init_group # Very important addition!
 		status = @model.start_operation($lsstoolbarStrings.GetString("LSS Control Points"))
 		self.generate_nodal_c_points
 		self.generate_result_group
 		self.generate_isolines if @draw_isolines
 		@lss_ctrlpnts_dict="lssctrlpnts" + "_" + Time.now.to_f.to_s
 		self.store_settings
-		if @hide_initial=="true" and @init_group
-			@init_group.visible=false
-		else
-			@init_group.visible=true
+		if @init_group
+			if @hide_initial=="true"
+				@init_group.visible=false
+			else
+				@init_group.visible=true
+			end
 		end
 		status = @model.commit_operation
+		
+		#Enforce refreshing of other lss objects if any
+		@result_group.attribute_dictionaries.each{|dict|
+			if dict.name!=@lss_ctrlpnts_dict
+				case dict.name.split("_")[0]
+					when "lssfllwedgs"
+					fllwedgs_refresh=Lss_Fllwedgs_Refresh.new
+					fllwedgs_refresh.enable_show_tool=false # It's necessary because some other refresh classes also use show tool and active tool changes causes crash, so it's necessary to supress at least one show tool
+					fllwedgs_refresh.refresh_given_obj(dict.name)
+				end
+			end
+		}
 	end
 	
 	def generate_nodal_c_points
@@ -381,6 +400,18 @@ class Lss_Ctrlpnts_Entity
 		@result_group.set_attribute(@lss_ctrlpnts_dict, "smooth_surf", @smooth_surf)
 		@result_group.set_attribute(@lss_ctrlpnts_dict, "c_obj_type", @c_obj_type)
 		
+		# Restore other attributes if any
+		if @other_dicts_hash
+			if @other_dicts_hash.length>0
+				@other_dicts_hash.each_key{|dict_name|
+					dict=@other_dicts_hash[dict_name]
+					dict.each_key{|key|
+						@result_group.set_attribute(dict_name, key, dict[key])
+					}
+				}
+			end
+		end
+		
 		# Store information in the current active model, that indicates 'LSS Ctrlpnts Object' presence in it.
 		# It is necessary for manual and automatic refreshing of this object after its part(s) chanching.
 		@model.set_attribute("lss_toolbar_objects", "lss_ctrlpnts", "present")
@@ -433,6 +464,24 @@ class Lss_Ctrlpnts_Refresh
 		}
 		# @selection.clear
 		lss_ctrlpnts_attr_dicts.uniq!
+		
+		# Try to check if parent group is initial group of ctrlpnts object
+		if lss_ctrlpnts_attr_dicts.length==0
+			active_path = Sketchup.active_model.active_path
+			if active_path
+				attr_dicts=active_path.last.attribute_dictionaries
+				if attr_dicts
+					if attr_dicts.to_a.length>0
+						attr_dicts.each{|attr_dict|
+							if attr_dict.name.split("_")[0]=="lssctrlpnts"
+								lss_ctrlpnts_attr_dicts+=[attr_dict.name]
+								@entities=active_path.last.parent.entities
+							end
+						}
+					end
+				end
+			end
+		end
 		if lss_ctrlpnts_attr_dicts.length>0
 			lss_ctrlpnts_attr_dicts.each{|lss_ctrlpnts_attr_dict_name|
 				process_grp=true
@@ -459,6 +508,17 @@ class Lss_Ctrlpnts_Refresh
 							@ctrlpnts_entity.lss_ctrlpnts_dict=lss_ctrlpnts_attr_dict_name
 						
 							@ctrlpnts_entity.perform_pre_deform
+							other_dicts_hash=Hash.new
+							@result_group.attribute_dictionaries.each{|other_dict|
+								if other_dict.name!=lss_ctrlpnts_attr_dict_name
+									dict_hash=Hash.new
+									other_dict.each_key{|key|
+										dict_hash[key]=other_dict[key]
+									}
+									other_dicts_hash[other_dict.name]=dict_hash
+								end
+							}
+							@ctrlpnts_entity.other_dicts_hash=other_dicts_hash
 							self.clear_previous_results(lss_ctrlpnts_attr_dict_name)
 							@ctrlpnts_entity.generate_results
 							@nodal_c_points=@ctrlpnts_entity.nodal_c_points
@@ -621,7 +681,7 @@ class Lss_Ctrlpnts_Tool
 		@settings_hash["min_color"]=[@min_color, "color"]
 		@settings_hash["soft_surf"]=[@soft_surf, "boolean"]
 		@settings_hash["smooth_surf"]=[@smooth_surf, "boolean"]
-		@settings_hash["c_obj_type"]=[@c_obj_type, "string"]
+		@settings_hash["c_obj_type"]=[@c_obj_type, "list"]
 		@settings_hash["transp_level"]=[@transp_level, "integer"]
 	end
 	
@@ -650,6 +710,7 @@ class Lss_Ctrlpnts_Tool
 	def write_prop_types # Added 13-Jul-12
 		@settings_hash.each_key{|key|
 			Sketchup.write_default("LSS_Prop_Types", key, @settings_hash[key][1])
+			Sketchup.active_model.set_attribute("LSS_Prop_Types", key, @settings_hash[key][1])
 		}
 	end
 	
@@ -734,10 +795,12 @@ class Lss_Ctrlpnts_Tool
 				end
 				self.hash2settings
 				@surface_col.alpha=1.0-@transp_level/100.0
-				if @hide_initial=="true" and @init_group
-					@init_group.visible=false
-				else
-					@init_group.visible=true
+				if @init_group
+					if @hide_initial=="true"
+						@init_group.visible=false
+					else
+						@init_group.visible=true
+					end
 				end
 			end
 			if action_name=="reset"

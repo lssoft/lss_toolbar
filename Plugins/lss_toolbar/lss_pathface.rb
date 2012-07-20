@@ -51,6 +51,14 @@ class Lss_PathFace_Entity
 	attr_accessor :soft_surf
 	attr_accessor :smooth_surf
 	
+	attr_accessor :surf_group
+	attr_accessor :tracks_group
+	attr_accessor :faces_group
+	
+	attr_accessor :surf_group_dicts
+	attr_accessor :tracks_group_dicts
+	attr_accessor :faces_group_dicts
+	
 	def initialize(first_face, second_face, path_curve)
 		@first_face=first_face
 		@second_face=second_face
@@ -66,6 +74,14 @@ class Lss_PathFace_Entity
 		
 		@first_face_aligned_pts=Array.new
 		@second_face_aligned_pts=Array.new
+		
+		@surf_group=nil
+		@tracks_group=nil
+		@faces_group=nil
+		
+		@surf_group_dicts=nil
+		@tracks_group_dicts=nil
+		@faces_group_dicts=nil
 		
 		@entities=Sketchup.active_model.active_entities
 	end
@@ -100,6 +116,38 @@ class Lss_PathFace_Entity
 		@first_face.set_attribute(@lss_pathface_dict, "soft_surf", @soft_surf)
 		@first_face.set_attribute(@lss_pathface_dict, "smooth_surf", @smooth_surf)
 		
+		# Restore other attributes if any
+		if @surf_group_dicts
+			if @surf_group_dicts.length>0
+				@surf_group_dicts.each_key{|dict_name|
+					dict=@surf_group_dicts[dict_name]
+					dict.each_key{|key|
+						@surf_group.set_attribute(dict_name, key, dict[key])
+					}
+				}
+			end
+		end
+		if @tracks_group_dicts
+			if @tracks_group_dicts.length>0
+				@tracks_group_dicts.each_key{|dict_name|
+					dict=@tracks_group_dicts[dict_name]
+					dict.each_key{|key|
+						@tracks_group.set_attribute(dict_name, key, dict[key])
+					}
+				}
+			end
+		end
+		if @faces_group_dicts
+			if @faces_group_dicts.length>0
+				@faces_group_dicts.each_key{|dict_name|
+					dict=@faces_group_dicts[dict_name]
+					dict.each_key{|key|
+						@faces_group.set_attribute(dict_name, key, dict[key])
+					}
+				}
+			end
+		end
+		
 		# Store information in the current active model, that indicates 'LSS Pathface Object' presence in it.
 		# It is necessary for manual and automatic refreshing of this object after its part(s) chanching.
 		model=Sketchup.active_model
@@ -107,17 +155,51 @@ class Lss_PathFace_Entity
 		# It is a bit dangerous approach, but for now looks like it's worth of it
 		model.set_attribute("lss_toolbar_refresh_cmds", "lss_pathface", "(Lss_Pathface_Refresh.new).refresh")
 		status = model.commit_operation
+		
+		#Enforce refreshing of other lss objects if any
+		if @surf_group
+			@surf_group.attribute_dictionaries.each{|dict|
+				if dict.name!=@lss_pathface_dict
+					case dict.name.split("_")[0]
+						when "lssfllwedgs"
+						fllwedgs_refresh=Lss_Fllwedgs_Refresh.new
+						fllwedgs_refresh.enable_show_tool=false # It's necessary because some other refresh classes also use show tool and active tool changes causes crash, so it's necessary to supress at least one show tool
+						fllwedgs_refresh.refresh_given_obj(dict.name)
+					end
+				end
+			}
+		end
+		if @tracks_group
+			@tracks_group.attribute_dictionaries.each{|dict|
+				if dict.name!=@lss_pathface_dict
+					case dict.name.split("_")[0]
+						when "lssfllwedgs"
+						(Lss_Fllwedgs_Refresh.new).refresh_given_obj(dict.name)
+					end
+				end
+			}
+		end
+		if @faces_group
+			@faces_group.attribute_dictionaries.each{|dict|
+				if dict.name!=@lss_pathface_dict
+					case dict.name.split("_")[0]
+						when "lssfllwedgs"
+						(Lss_Fllwedgs_Refresh.new).refresh_given_obj(dict.name)
+					end
+				end
+			}
+		end
 	end
 	
 	def generate_faces_group
 		prgr_bar=Lss_Toolbar_Progr_Bar.new(@result_faces_pts.length,"|","_",2)
-		faces_group=@entities.add_group
+		@faces_group=@entities.add_group
 		@result_faces_pts.each_index{|ind|
 			prgr_bar.update(ind)
 			Sketchup.status_text = "#{$lsstoolbarStrings.GetString("Generating faces:")} #{prgr_bar.progr_string}"
 			begin
 				fc_pts=@result_faces_pts[ind]
-				fc=faces_group.entities.add_face(fc_pts)
+				fc=@faces_group.entities.add_face(fc_pts)
 				mat=@result_mats[ind][0]
 				back_mat=@result_mats[ind][1]
 				if mat
@@ -140,7 +222,7 @@ class Lss_PathFace_Entity
 					new_pts<<pt if is_uniq
 				}
 				begin
-					fc=faces_group.entities.add_face(new_pts)
+					fc=@faces_group.entities.add_face(new_pts)
 				rescue Exception => e1
 					puts(e1.message)
 				end
@@ -158,13 +240,13 @@ class Lss_PathFace_Entity
 				end
 			end
 		}
-		faces_group.set_attribute(@lss_pathface_dict, "inst_type", "faces_group")
+		@faces_group.set_attribute(@lss_pathface_dict, "inst_type", "faces_group")
 		Sketchup.status_text = ""
 	end
 	
 	def generate_tracks_group
 		prgr_bar=Lss_Toolbar_Progr_Bar.new(@result_tracks_pts.length,"|","_",2)
-		tracks_group=@entities.add_group
+		@tracks_group=@entities.add_group
 		@result_tracks_pts.each_index{|track_ind|
 			track=@result_tracks_pts[track_ind]
 			prgr_bar.update(track_ind)
@@ -173,11 +255,11 @@ class Lss_PathFace_Entity
 				if ind>0
 					pt1=track[ind-1]
 					pt2=track[ind]
-					tracks_group.entities.add_line(pt1, pt2)
+					@tracks_group.entities.add_line(pt1, pt2)
 				end
 			}
 		}
-		tracks_group.set_attribute(@lss_pathface_dict, "inst_type", "tracks_group")
+		@tracks_group.set_attribute(@lss_pathface_dict, "inst_type", "tracks_group")
 		Sketchup.status_text = ""
 	end
 	
@@ -219,7 +301,7 @@ class Lss_PathFace_Entity
 	
 	def generate_surface_group
 		prgr_bar=Lss_Toolbar_Progr_Bar.new(@result_surf_pts.length,"|","_",2)
-		surf_group=@entities.add_group
+		@surf_group=@entities.add_group
 		@result_surf_pts.each_index{|ind|
 			prgr_bar.update(ind)
 			Sketchup.status_text = "#{$lsstoolbarStrings.GetString("Generating surface:")} #{prgr_bar.progr_string}"
@@ -229,7 +311,7 @@ class Lss_PathFace_Entity
 			surf_ring=@result_surf_pts[ind]
 			surf_ring.each{|fc_pts|
 				begin
-					fc=surf_group.entities.add_face(fc_pts)
+					fc=@surf_group.entities.add_face(fc_pts)
 					if mat
 						fc.material=mat
 						fc.material.alpha=mat.alpha/255.0
@@ -256,7 +338,7 @@ class Lss_PathFace_Entity
 						new_pts<<pt if is_uniq
 					}
 					begin
-						fc=surf_group.entities.add_face(new_pts)
+						fc=@surf_group.entities.add_face(new_pts)
 					rescue Exception => e1
 						puts(e1.message)
 					end
@@ -282,7 +364,7 @@ class Lss_PathFace_Entity
 				end
 			}
 		}
-		surf_group.set_attribute(@lss_pathface_dict, "inst_type", "surface_group")
+		@surf_group.set_attribute(@lss_pathface_dict, "inst_type", "surface_group")
 		Sketchup.status_text = ""
 	end
 
@@ -587,6 +669,17 @@ class Lss_Pathface_Refresh
 		if @first_face and @second_face and @path_curve
 			self.clear_previous_results(lss_pathface_attr_dict_name)
 			pathface_entity=Lss_PathFace_Entity.new(@first_face, @second_face, @path_curve)
+			@ents_other_dicts.each_index{|ind|
+				other_dicts_hash=@ents_other_dicts[ind]
+				case ind
+					when 0
+					pathface_entity.surf_group_dicts=other_dicts_hash
+					when 1
+					pathface_entity.tracks_group_dicts=other_dicts_hash
+					when 2
+					pathface_entity.faces_group_dicts=other_dicts_hash
+				end
+			}
 			pathface_entity.generate_faces=@first_face.get_attribute(lss_pathface_attr_dict_name, "generate_faces")
 			pathface_entity.generate_surf=@first_face.get_attribute(lss_pathface_attr_dict_name, "generate_surf")
 			pathface_entity.generate_tracks=@first_face.get_attribute(lss_pathface_attr_dict_name, "generate_tracks")
@@ -614,6 +707,9 @@ class Lss_Pathface_Refresh
 		@first_face=nil
 		@second_face=nil
 		@path_curve=nil
+		@surf_group=nil
+		@tracks_group=nil
+		@faces_group=nil
 		@entities.each{|ent|
 			if ent.attribute_dictionaries.to_a.length>0
 				chk_obj_dict=ent.attribute_dictionaries[obj_name]
@@ -625,6 +721,12 @@ class Lss_Pathface_Refresh
 						@second_face=ent
 						when "path_curve"
 						@path_curve=ent.curve
+						when "surface_group"
+						@surf_group=ent
+						when "tracks_group"
+						@tracks_group=ent
+						when "faces_group"
+						@faces_group=ent
 					end
 				end
 			end
@@ -632,18 +734,26 @@ class Lss_Pathface_Refresh
 	end
 	
 	def clear_previous_results(obj_name)
-		ents2erase=Array.new
-		@entities.each{|ent|
-			if ent.attribute_dictionaries.to_a.length>0
-				chk_obj_dict=ent.attribute_dictionaries[obj_name]
-				if chk_obj_dict
-					if chk_obj_dict["inst_type"]=="surface_group" or chk_obj_dict["inst_type"]=="tracks_group" or chk_obj_dict["inst_type"]=="faces_group"
-						ents2erase<<ent
+		ents2erase=[@surf_group, @tracks_group, @faces_group]
+		@ents_other_dicts=Array.new
+		ents2erase.each{|ent|
+			if ent
+				other_dicts_hash=Hash.new
+				ent.attribute_dictionaries.each{|other_dict|
+					if other_dict.name!=obj_name
+						dict_hash=Hash.new
+						other_dict.each_key{|key|
+							dict_hash[key]=other_dict[key]
+						}
+						other_dicts_hash[other_dict.name]=dict_hash
 					end
-				end
+				}
 			end
+			@ents_other_dicts<<other_dicts_hash
 		}
-		@entities.erase_entities(ents2erase)
+		@surf_group.erase! if @surf_group
+		@tracks_group.erase! if @tracks_group
+		@faces_group.erase! if @faces_group
 	end
 	
 end #class Lss_Pathface_Refresh
@@ -737,6 +847,7 @@ class Lss_PathFace_Tool
 	def write_prop_types # Added 13-Jul-12
 		@settings_hash.each_key{|key|
 			Sketchup.write_default("LSS_Prop_Types", key, @settings_hash[key][1])
+			Sketchup.active_model.set_attribute("LSS_Prop_Types", key, @settings_hash[key][1])
 		}
 	end
 	
@@ -865,7 +976,7 @@ class Lss_PathFace_Tool
 		@pathface_dialog.set_file(html_path)
 		@pathface_dialog.show()
 		@pathface_dialog.set_on_close{
-			self.pathface_write_defaults
+			self.write_defaults
 			Sketchup.active_model.select_tool(nil)
 		}
 	end
@@ -1001,7 +1112,6 @@ class Lss_PathFace_Tool
 						coincide_cnt1+=1 if result1==2 # 2: Sketchup::Face::PointOnVertex (point touches a vertex) 16.05.12.
 						coincide_cnt2+=1 if result2==2 # 2: Sketchup::Face::PointOnVertex (point touches a vertex)
 					}
-					puts @path_curve.vertices.length
 					erase_path=false
 					if coincide_cnt1==@path_curve.vertices.length or coincide_cnt2==@path_curve.vertices.length
 						erase_path=true 

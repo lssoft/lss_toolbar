@@ -149,3 +149,17 @@ a:hover
 	padding: 0;
 	border-collapse: collapse;
 }
+.RO
+{
+	background: #A6A6A6;
+	font-weight: bold;
+	border-width:1px;
+	border-style: outset;
+	border-spacing: 0;
+}
+.side_btn
+{
+	border-width: 1px;
+	border-color: white;
+	cursor: hand;
+}
