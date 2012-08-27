@@ -1,0 +1,78 @@
+<html>
+<head>
+<title>Blend Tool</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="help.css" rel="stylesheet" type="text/css">
+<link rel="icon" href="favicon.ico" type="image/x-icon"> 
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<script>
+function update_frm(){
+	var frm=document.getElementById("cont_frm");
+	var url=frm.src;
+	
+}
+
+function img_over(info_img){
+	img_src_str=info_img.getAttribute("src");
+	img_src_str=img_src_str.replace(".gif", "_demo.gif");
+	info_img.setAttribute("src", img_src_str);
+}
+function img_out(info_img){
+	img_src_str=info_img.getAttribute("src");
+	img_src_str=img_src_str.replace("_demo.gif", ".gif");
+	info_img.setAttribute("src", img_src_str);
+}
+</script>
+</head>
+<body onload="update_frm()" scroll="auto" class="body">
+<table width="100%" height="85%" class="page_tbl">
+	<caption>
+		<table width="100%" class="page_tbl">
+			<tr class="help_header">
+				<td>
+					<div style="margin: 0.5em; vertical-align: middle;">'LSS Toolbar' Help System</div>
+				</td>
+				<td align="right">
+					<div style="margin: 0.5em; vertical-align: middle;"><a href="http://sites.google.com/site/lssoft2011" target="blank"><img src="images/lss_logo_alpha.gif" border="0" style="vertical-align: middle;" title="Visit Links' Systems Software web-site"></a></div>
+				</td>
+			</tr>
+		</table>
+	</caption>
+	<tfoot>
+		<tr class="help_footer">
+			<td>
+				<div style="margin: 0.5em; vertical-align: middle;">Browse more information on-line&gt;&gt;</div>
+			</td>
+			<td>
+				<table width="100%">
+					<tr class="help_footer_font">
+						<td>
+							<div style="margin: 0.5em; vertical-align: middle;" id="related_info_div">
+								<script type="text/javascript" src="rel_info.js"></script>
+							</div>
+						</td>
+						<td align="right">
+							<div style="margin: 0.5em; vertical-align: middle;">
+								<a class="footer_a" href="http://sites.google.com/site/lssoft2011" target="blank">(c)2012 Links' Systems Software</a>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</tfoot>
+	<tbody>
+		<tr>
+			<td class="navigation">
+				<img src="images/blend.gif" onmouseover="img_over(this)" onmouseout="img_out(this)" border="0"><br>
+				<div id="nav_div" style="margin: 1em;"></div>
+				<script type="text/javascript" src="nav.js"></script>
+			</td>
+			<td>
+				<iframe id="cont_frm" src="blend/index.html"  width="100%" height="100%" frameborder="0"></iframe>
+			</td>
+		</tr>
+	</tbody>
+</table>
+</body>
+</html>

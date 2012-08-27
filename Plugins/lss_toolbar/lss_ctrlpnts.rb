@@ -702,7 +702,7 @@ class Lss_Ctrlpnts_Tool
 	def write_defaults
 		self.settings2hash
 		@settings_hash.each_key{|key|
-			Sketchup.write_default("LSS_Recursive", key, @settings_hash[key][0].to_s)
+			Sketchup.write_default("LSS_Ctrlpnts", key, @settings_hash[key][0].to_s)
 		}
 		self.write_prop_types # Added 13-Jul-12
 	end
@@ -1029,13 +1029,13 @@ class Lss_Ctrlpnts_Tool
 		self.draw_invalid_bnds(view) if @under_cur_invalid_bnds
 		self.draw_group_under_cur(view) if @group_under_cur
 		self.draw_selected_group(view) if @init_group
+		self.draw_result_points(view) if @result_points
+		self.draw_nodal_points(view) if @nodal_points
 		if @pt_over
 			view.line_width=2
 			view.draw_points(@pt_over, 12, 1, "red")
 			view.line_width=1
 		end
-		self.draw_result_points(view) if @result_points
-		self.draw_nodal_points(view) if @nodal_points
 		self.draw_isolines(view) if @isolines_pts
 	end
 	

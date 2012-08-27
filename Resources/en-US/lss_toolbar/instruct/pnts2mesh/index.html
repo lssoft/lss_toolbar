@@ -1,0 +1,53 @@
+<html>
+<head>
+<title>Make 3D Mesh Tool</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="help.css" rel="stylesheet" type="text/css">
+</head>
+<body class="body">
+    <p><a href="index.html"><span class="blackheader"><img src="images/pnts2mesh_instr.gif" border="0"></span></a></p>
+    <p><a href="index.html"><span class="blackheader">Make 3D Mesh Tool</span></a></p>
+    Draw curved 3D mesh interactively
+    <p><span class="blacksubheader">Tool Operation</span> </p> 
+	<ol>
+		<li>open tool dialog</li>
+		<li>adjust settings</li>
+		<li>draw nodal points of the surface interactively</li>
+		<li>apply settings or double-click the last nodal point to generate smoothed 3D surface</li>
+	</ol>
+	
+	<p><span class="blacksubheader">Advanced Operations</span> </p> 
+	<ul>
+		<li>Right-click = pop-up menu with surface drawing additional commands</li>
+		<li>Double-click = enter last nodal point and generate the result surface</li>
+	</ul>
+	<br>
+	It is also possible to move nodal points to another positions while 'Make 3D Mesh' tool is active:
+	<ol>
+		<li><img src="../images/cursors/over_pt.gif"> place mouse pointer over a nodal point</li>
+		<li><img src="../images/cursors/move_pt.gif"> click and drag to move it</li>
+		<li>release mouse button to leave nodal point at a new desired position</li>
+	</ol>
+	It is an optional usage scenario, since it is possible to interact with surface nodal points any time later.
+	
+	<p><span class="blacksubheader">Modifier Keys</span> </p> 
+	<ul>
+		<li>Esc = cancel surface drawing</li>
+		<li>Del = delete last entered nodal point or delete particular nodal point, when mouse pointer is over it</li>
+	</ul>
+	
+	<p><span class="blacksubheader">Post Processing</span></p>
+	Move surface nodal points to rebuild generated surface.
+
+	<p><span class="blacksubheader">Note</span> </p> 
+	<div class="note">
+		All objects, generated using 'LSS Toolbar' has common post processing capabilities:
+		<ul>
+			<li><img src="../images/buttons/refresh_24.gif"> 'Refresh' command rebuilds generated results manually</li>
+			<li><img src="../images/buttons/observe_24.gif"> 'Observe Changes' command enables instant refreshing after move/scale events</li>
+			<li><img src="../images/buttons/props_24.gif"> 'Properties' command provides re-adjustment of initially entered settings any time later after object creation</li>
+		</ul>
+		View 'Commands' section of LSS Toolbar <a href="../index.html"  target="_blank">'Help Index'</a> for more information about post processing capabilities.
+	</div>
+</body>
+</html>

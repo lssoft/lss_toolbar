@@ -2,7 +2,7 @@
 //Links System Software (c)2012
 //lss_toolbar_ext.rb
 "LSS Toolbar"="LSS Toolbar";
-"Set of tools, which provides new geometry creation and advanced manipulation."="Set of tools, which provides new geometry creation and advanced manipulation.";
+"This is a set of tools for advanced geometry creation and manipulation."="This is a set of tools for advanced geometry creation and manipulation.";
 //lss_toolbar.rb
 "LSS Tools"="LSS Tools";
 //lss_pathface.rb

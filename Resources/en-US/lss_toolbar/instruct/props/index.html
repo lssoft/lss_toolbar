@@ -1,0 +1,44 @@
+<html>
+<head>
+<title>Edit Entity Properties Command</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="help.css" rel="stylesheet" type="text/css">
+</head>
+<body class="body">
+    <p><a href="index.html"><span class="blackheader">Edit Entity Properties Command</span></a></p>
+	<p><span class="blacksubheader">Brief</span> </p> 
+	Displays properties dialog to view and edit properties of an object created using 'LSS Toolbar'
+	
+	<p><span class="blacksubheader">Usage</span> </p> 
+	<ol>
+		<li>select any entity, which is a part of an object created using any tool of 'LSS Toolbar'</li>
+		<li>click <img src="../images/buttons/props_24.gif" border="0" valign="top"> command button of 'LSS&nbsp;Toolbar' or choose 'Edit Entity Properties' command from 'Sketchup&nbsp;Main&nbsp;Menu>>Plugins>>LSS&nbsp;Tools'</li>
+		<li>change any editable property in the list to refresh 'LSS Object' immidiately</li>
+	</ol>
+	<br>
+	As soon as 'Properties' dialog is open it observes selection changes and refreshes properties list automatically after
+	selection changes.<br>
+	'Properties' dialog provides two ways to enter values of properties that represent any kind of distance:
+	<ul>
+		<li>enter distance value from a keyboard directly in value field of 'Properties' dialog box</li>
+		<li>use '&gt;&gt;' button to specify distance value interactively in an active model</li>
+	</ul>
+	<img src="../images/dist_btn.gif" border="0"><br>
+	<p><span class="blacksubheader">Note</span> </p> 
+	<div class="note">
+		The result of any 'LSS Toolbar' tool processing is not just a set of new geometric entities but an object,
+		which allows interaction after tool processing completion.<br>
+		Each 'LSS Object' has two basic parts:
+		<ul>
+			<li>'passive' part &mdash; new geometric entities (a direct result of tool processing)</li>
+			<li>'active' part &mdash; existing (initial) and/or newly generated (utility) entities</li>
+		</ul>
+		So it is possible to continue interaction with an object by modifying its 'active' part.<br>
+		There are two ways to refresh object's 'passive' part after 'active' part modification:
+		<ul>
+			<li><img src="../images/buttons/refresh_24.gif" border="0" valign="top"> manual &mdash; 'Refresh' command</li>
+			<li><img src="../images/buttons/observe_24.gif" border="0" valign="top"> automatic &mdash; 'Observe Changes' command</li>
+		</ul>
+	</div>
+</body>
+</html>

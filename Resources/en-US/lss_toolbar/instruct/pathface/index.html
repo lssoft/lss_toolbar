@@ -1,21 +1,53 @@
 <html>
 <head>
 <title>2 Faces + Path Tool</title>
-<meta http-equiv="Content-Type" content="text/html; charset=win-1251">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link href="help.css" rel="stylesheet" type="text/css">
+<script>
+function send_size(){
+	if (top!=self){
+		var hgt = document.body.scrollHeight;
+		var wdt = document.body.scrollWidth;
+		var size_str=hgt+"_"+wdt;
+		window.name=size_str;
+		window.location.hash = size_str;
+	}
+}
+</script>
 </head>
-<body class="body">
-    <p><a href="index.html"><span class="blackheader"><img src="images/lss_matrix_dial.gif" width="320" height="240" border="0"></span></a></p>
+<body class="body" onload="send_size()">
+    <p><a href="index.html"><span class="blackheader"><img src="images/pathface_instr.gif" border="0"></span></a></p>
     <p><a href="index.html"><span class="blackheader">2 Faces + Path Tool</span></a></p>
-    
+    Generate gradual morphing from one face to another and distribute results along a given path
     <p><span class="blacksubheader">Tool Operation</span> </p> 
-      <ol> 
-        <li></li> 
-      </ol> 
+	<ol>
+		<li>open tool dialog</li>
+		<li>pick first face</li>
+		<li>pick second face</li>
+		<li>pick path curve</li>
+		<li>adjust settings</li>
+		<li>apply settings to generate '2 Faces + Path' object</li>
+	</ol>
+	
+	<p><span class="blacksubheader">Advanced Operations</span> </p> 
+	<ul>
+		<li>use <img src="images/pathface_flip_norm.gif" title="Flip face normal"><img src="images/pathface_dock_verts.gif" title="Rotate face to dock vertices">
+		speed buttons inside tool dialog to flip/rotate first or second face (it helps to achieve more smooth morphing result)</li>
+		<li>use <img src="images/pathface_reverse_path.gif" title="Reverse path"> speed button to reverse path curve if needed</li>
+	</ul>
 
-      <p><span class="blacksubheader">Note</span> </p> 
-      <div class="note">
-          
-      </div>
+	<p><span class="blacksubheader">Post Processing</span></p>
+	Modify any of two initial faces and/or path curve to rebuild result object.
+
+	<p><span class="blacksubheader">Note</span> </p> 
+	<div class="note">
+		All objects, generated using 'LSS Toolbar' has common post processing capabilities:
+		<ul>
+			<li><img src="../images/buttons/refresh_24.gif"> 'Refresh' command rebuilds generated results manually</li>
+			<li><img src="../images/buttons/observe_24.gif"> 'Observe Changes' command enables instant refreshing after move/scale events</li>
+			<li><img src="../images/buttons/props_24.gif"> 'Properties' command provides re-adjustment of initially entered settings any time later after object creation</li>
+		</ul>
+		View 'Commands' section of LSS Toolbar <a href="../index.html"  target="_blank">'Help Index'</a> for more information about post processing capabilities.
+	</div>
 </body>
 </html>

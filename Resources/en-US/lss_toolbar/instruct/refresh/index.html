@@ -1,0 +1,38 @@
+<html>
+<head>
+<title>Refresh Command</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="help.css" rel="stylesheet" type="text/css">
+</head>
+<body class="body">
+    <p><a href="index.html"><span class="blackheader">Refresh Command</span></a></p>
+	<p><span class="blacksubheader">Brief</span> </p> 
+	Refreshes created 'LSS Object(s)'<br>
+	
+	<p><span class="blacksubheader">Usage</span> </p> 
+	<ol>
+		<li>select any entity, which is a part of an object created using any tool of 'LSS Toolbar'</li>
+		<li>click <img src="../images/buttons/refresh_24.gif" border="0" valign="top"> command button of 'LSS&nbsp;Toolbar' or choose 'Refresh' command from 'Sketchup&nbsp;Main&nbsp;Menu>>Plugins>>LSS&nbsp;Tools'</li>
+	</ol>
+	<br>
+	It is possible to select multiple entities at once, then launch 'Refresh' command. Command iterates through a set of
+	selected entities first and performs refreshing only if some of entities related to 'LSS Toolbar' were detected in selection.
+	
+	<p><span class="blacksubheader">Note</span> </p> 
+	<div class="note">
+		The result of any 'LSS Toolbar' tool processing is not just a set of new geometric entities but an object,
+		which allows interaction after tool processing completion.<br>
+		Each 'LSS Object' has two basic parts:
+		<ul>
+			<li>'passive' part &mdash; new geometric entities (a direct result of tool processing)</li>
+			<li>'active' part &mdash; existing (initial) and/or newly generated (utility) entities</li>
+		</ul>
+		So it is possible to continue interaction with an object by modifying its 'active' part.<br>
+		There are two ways to refresh object's 'passive' part after 'active' part modification:
+		<ul>
+			<li><img src="../images/buttons/refresh_24.gif" border="0" valign="top"> manual &mdash; 'Refresh' command</li>
+			<li><img src="../images/buttons/observe_24.gif" border="0" valign="top"> automatic &mdash; 'Observe Changes' command</li>
+		</ul>
+	</div>
+</body>
+</html>

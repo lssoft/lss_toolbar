@@ -985,8 +985,10 @@ class Lss_Pnts2mesh_Tool
 	def initialize
 		pnts2mesh_point_path=Sketchup.find_support_file("pnts2mesh_point.png", "Plugins/lss_toolbar/cursors/")
 		@point_pt_cur_id=UI.create_cursor(pnts2mesh_point_path, 0, 0)
-		pnts2mesh_del_point_path=Sketchup.find_support_file("pnts2mesh_del_point.png", "Plugins/lss_toolbar/cursors/")
-		@del_pt_cur_id=UI.create_cursor(pnts2mesh_del_point_path, 0, 0)
+		pnts2mesh_over_pt_path=Sketchup.find_support_file("pnts2mesh_over_pt.png", "Plugins/lss_toolbar/cursors/")
+		@over_pt_cur_id=UI.create_cursor(pnts2mesh_over_pt_path, 0, 0)
+		pnts2mesh_move_pt_path=Sketchup.find_support_file("pnts2mesh_move_pt.png", "Plugins/lss_toolbar/cursors/")
+		@move_pt_cur_id=UI.create_cursor(pnts2mesh_move_pt_path, 0, 0)
 		def_cur_path=Sketchup.find_support_file("lss_default_cur.png", "Plugins/lss_toolbar/cursors/")
 		@def_cur_id=UI.create_cursor(def_cur_path, 0, 0)
 		@pick_state=nil # Indicates cursor type while the tool is active
@@ -1019,6 +1021,10 @@ class Lss_Pnts2mesh_Tool
 		
 		# Draw section
 		@nodal_points=nil
+		@pt_over=nil
+		@pt_over_ind=nil
+		@move_pt_ind=nil
+		@move_pt=nil
 
 		@settings_hash=Hash.new
 	end
@@ -1082,7 +1088,7 @@ class Lss_Pnts2mesh_Tool
 	def write_defaults
 		self.settings2hash
 		@settings_hash.each_key{|key|
-			Sketchup.write_default("LSS_Recursive", key, @settings_hash[key][0].to_s)
+			Sketchup.write_default("LSS_Pnts2mesh", key, @settings_hash[key][0].to_s)
 		}
 		self.write_prop_types # Added 13-Jul-12
 	end
@@ -1273,15 +1279,51 @@ class Lss_Pnts2mesh_Tool
 	def onSetCursor
 		case @pick_state
 			when "point_pt"
-			UI.set_cursor(@point_pt_cur_id)
-			when "delete_pt"
-			UI.set_cursor(@del_pt_cur_id)
+			if @drag_state
+				UI.set_cursor(@move_pt_cur_id)
+			else
+				UI.set_cursor(@point_pt_cur_id)
+			end
+			when "over_pt"
+			UI.set_cursor(@over_pt_cur_id)
 			else
 			UI.set_cursor(@def_cur_id)
 		end
 	end
 	  
 	def onMouseMove(flags, x, y, view)
+		if @nodal_points
+			if @nodal_points.length>1
+				ph = view.pick_helper
+				aperture = 5
+				p = ph.init(x, y, aperture)
+				pt_over=false
+				@nodal_points.each_index{|ind|
+					pt=@nodal_points[ind]
+					if ind<@nodal_points.length-1
+						pt_over = view.pick_helper.test_point(pt)
+						if pt_over
+							@pt_over=Geom::Point3d.new(pt)
+							@pt_over_ind=ind
+							break
+						end
+					end
+				}
+				if @pick_state=="point_pt"
+					if pt_over
+						@pick_state="over_pt"
+					else
+						@pt_over=nil
+						@pt_over_ind=nil
+					end
+				end
+				if @pick_state=="over_pt" and pt_over==false
+					@pt_over=nil
+					@pt_over_ind=nil
+					@pick_state="point_pt"
+				end
+			end
+		end
 		@ip1.pick view, x, y
 		if( @ip1 != @ip )
 			view.invalidate
@@ -1294,35 +1336,15 @@ class Lss_Pnts2mesh_Tool
 				if @nodal_points.length>1
 					self.make_pnts2mesh_entity
 				end
-				if flags==4 and @pick_state=="point_pt"
-					ph = view.pick_helper
-					aperture = 5
-					p = ph.init(x, y, aperture)
-					pt_over=false
-					@nodal_points.each{|pt|
-						pt_over = view.pick_helper.test_point(pt)
-					}
-					@pick_state="delete_pt" if pt_over
-				end
-				if @pick_state=="delete_pt" and flags!=4
-					@pick_state="point_pt"
-				end
 			else
 				@nodal_points[0]=@ip.position
 			end
-		end
-		if @pick_state=="delete_pt"
-			if flags!=4
-				@pick_state="point_pt"
+			if @drag_state
+				if @nodal_points.length>0 and @move_pt_ind
+					@nodal_points[@move_pt_ind]=@ip.position
+					@nodal_points[@nodal_points.length-1]=@ip.position
+				end
 			end
-			ph = view.pick_helper
-			aperture = 5
-			p = ph.init(x, y, aperture)
-			pt_over=true
-			@nodal_points.each{|pt|
-				pt_over = view.pick_helper.test_point(pt)
-			}
-			@pick_state="point_pt" if pt_over==false
 		end
 	end
 	
@@ -1368,6 +1390,11 @@ class Lss_Pnts2mesh_Tool
 		end
 		self.draw_result_surface_points(view) if @result_surface_points
 		self.draw_nodal_points(view) if @nodal_points
+		if @pt_over
+			view.line_width=2
+			view.draw_points(@pt_over, 12, 1, "red")
+			view.line_width=1
+		end
 		self.draw_horizontals(view) if @horizontal_points
 	end
 	
@@ -1489,6 +1516,9 @@ class Lss_Pnts2mesh_Tool
 		@horizontal_points=nil
 		# Draw section
 		@nodal_points=nil
+		@pt_over=nil
+		@pt_over_ind=nil
+		@move_pt_ind=nil
 		# Settings
 		self.read_defaults
 		self.send_settings2dlg
@@ -1503,25 +1533,44 @@ class Lss_Pnts2mesh_Tool
 		@pnts2mesh_dialog.close
 		self.reset(view)
 	end
+	
+	def onLButtonDown(flags, x, y, view)
+		@drag_state=true
+		@last_click_time=Time.now
+		if @pick_state=="over_pt"
+			ph = view.pick_helper
+			aperture = 5
+			p = ph.init(x, y, aperture)
+			pt_over=false
+			@nodal_points.each_index{|ind|
+				pt=@nodal_points[ind]
+				pt_over = view.pick_helper.test_point(pt)
+				if pt_over
+					@move_pt_ind=ind
+					@over_pt_ind=ind
+					break
+				end
+			}
+			@pick_state="point_pt"
+		end
+	end
 
 	# Pick entities by single click and draw new curve
 	def onLButtonUp(flags, x, y, view)
+		@drag_state=false if Time.now-@last_click_time<1
 		@ip.pick(view, x, y)
 		case @pick_state
 			when "point_pt"
 			@nodal_points<<@ip.position
+			if @drag_state
+				last_pt=@nodal_points.pop
+				@nodal_points[@move_pt_ind]=@ip.position if @move_pt_ind
+				self.make_pnts2mesh_entity if @nodal_points.length>1
+			end
 			self.make_pnts2mesh_entity if @nodal_points.length>1
-			when "delete_pt"
-			ph=view.pick_helper
-			aperture = 5
-			p = ph.init(x, y, aperture)
-			@nodal_points.each{|pt|
-				pt_clicked = ph.test_point(pt)
-				@nodal_points.delete(pt) if pt_clicked
-			}
-			@pick_state="point_pt"
 		end
 		self.send_settings2dlg
+		@drag_state=false
 	end
 	
 	def send_nodal_points_2dlg
@@ -1587,6 +1636,18 @@ class Lss_Pnts2mesh_Tool
 				if @nodal_points
 					if @nodal_points.length>0
 						last_pt=@nodal_points.pop
+						self.make_pnts2mesh_entity
+						view.invalidate
+					end
+				end
+			end
+			if @pick_state=="over_pt"
+				if @nodal_points
+					if @nodal_points.length>0
+						del_pt=@nodal_points.delete_at(@pt_over_ind)
+						self.make_pnts2mesh_entity
+						view.invalidate
+						@pt_over_ind=nil
 					end
 				end
 			end

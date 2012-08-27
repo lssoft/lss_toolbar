@@ -1,0 +1,297 @@
+<html>
+<head>
+<title>LSS Toolbar Help Index</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="help.css" rel="stylesheet" type="text/css">
+<link rel="icon" href="favicon.ico" type="image/x-icon"> 
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<script>
+function img_over(info_img){
+	img_src_str=info_img.getAttribute("src");
+	img_src_str=img_src_str.replace(".gif", "_demo.gif");
+	info_img.setAttribute("src", img_src_str);
+}
+function img_out(info_img){
+	img_src_str=info_img.getAttribute("src");
+	img_src_str=img_src_str.replace("_demo.gif", ".gif");
+	info_img.setAttribute("src", img_src_str);
+}
+</script>
+</head>
+<body class="body"> 
+ <table class="specification_tbl" cellspacing="0" cellpadding="0">
+	
+	<caption>
+		<table width="100%" class="page_tbl">
+			<tr class="help_header">
+				<td>
+					<div style="margin: 0.5em; vertical-align: middle;">'LSS Toolbar' Help System</div>
+				</td>
+				<td align="right">
+					<div style="margin: 0.5em; vertical-align: middle;"><a href="http://sites.google.com/site/lssoft2011/home/lss-toolbar" target="blank"><img src="images/lss_logo_alpha.gif" border="0" style="vertical-align: middle;" title="Visit Links' Systems Software web-site"></a></div>
+				</td>
+			</tr>
+		</table>
+	</caption>
+	<tfoot>
+		<tr class="help_footer">
+			<td>
+				<div style="margin: 0.5em; vertical-align: middle;">Browse more information on-line&gt;&gt;</div>
+			</td>
+			<td>
+				<table width="100%">
+					<tr class="help_footer_font">
+						<td>
+							<div style="margin: 0.5em; vertical-align: middle;" id="related_info_div">
+								<script type="text/javascript" src="rel_info.js"></script>
+							</div>
+						</td>
+						<td align="right">
+							<div style="margin: 0.5em; vertical-align: middle;">
+								<a class="footer_a" href="http://sites.google.com/site/lssoft2011" target="blank">(c)2012 Links' Systems Software</a>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+	</tfoot>
+	<tbody>
+		<tr>
+		  <td colspan=2>&nbsp;</td>
+		</tr>
+		<tr>
+		  <td class="specif_tbl_sub_hdr">Tools</td>
+		  <td></td>
+		</tr>
+		<tr>
+		  <td class="specif_tbl_val"><img src="images/buttons/pathface_24.gif" valign="top">&nbsp;<a href="pathface.html">2 Faces + Path</a></td>
+		  <td class="brief_info">Generate gradual morphing from one face to another and distribute results along a given path</td>
+		</tr>
+		<tr>
+		  <td class="specif_tbl_val"><a href="pathface.html"><img src="images/pathface.gif" onmouseover="img_over(this)" onmouseout="img_out(this)" border="0" border="0"></a></td>
+		  <td class="specif_tbl_data">
+		  Tool processing:
+			<ul>
+				<li>open tool dialog</li>
+				<li>pick first face</li>
+				<li>pick second face</li>
+				<li>pick path curve</li>
+				<li>adjust settings</li>
+				<li>apply settings to generate '2 Faces + Path' object</li>
+			</ul>
+			<br>
+			Post processing:<br>
+			modify any of two initial faces and/or path curve to rebuild result object.
+			<br>
+			<a href="pathface.html" title="Learn about modifier keys, advanced operations, etc.">Learn more...</a>
+		  </td>
+		</tr>
+		
+		<tr>
+		  <td class="specif_tbl_val"><img src="images/buttons/blend_24.gif"  valign="top">&nbsp;<a href="blend.html">Blend</a></td>
+		  <td class="brief_info">Generate gradual morphing from one entity to another</td>
+		</tr>
+		<tr>
+		  <td class="specif_tbl_val"><a href="blend.html"><img src="images/blend.gif" onmouseover="img_over(this)" onmouseout="img_out(this)" border="0"></a></td>
+		  <td class="specif_tbl_data">
+			Tool processing:
+			<ul>
+				<li>open tool dialog</li>
+				<li>pick first entity</li>
+				<li>pick second entity</li>
+				<li>adjust settings (first of all desired 'morphing' steps count)</li>
+				<li>apply settings to generate 'Blend' object</li>
+			</ul>
+			<br>
+			Post processing:<br>
+			modify any of two initial entities to rebuild result object.
+			<br>
+			<a href="blend.html" title="Learn about modifier keys, advanced operations, etc.">Learn more...</a>
+		  </td>
+		  </td>
+		</tr>
+		
+		<tr>
+		  <td class="specif_tbl_val"><img src="images/buttons/crvsmth_24.gif" valign="top">&nbsp;<a href="crvsmth.html">Recursively Smoothed Curve</a></td>
+		  <td class="brief_info">Smooth a given curve or draw a new one</td>
+		</tr>
+		<tr>
+		  <td class="specif_tbl_val"><a href="crvsmth.html"><img src="images/crvsmth.gif" onmouseover="img_over(this)" onmouseout="img_out(this)" border="0"></a></td>
+		  <td class="specif_tbl_data">
+			Tool processing:
+			<ul>
+				<li>open tool dialog</li>
+				<li>pick curve to be smoothed</li>
+				<li>adjust settings</li>
+				<li>apply settings to generate recursively smoothed curve</li>
+			</ul>
+			It is also possible to draw new curve interactively instead of picking an existing non-smoothed curve.
+			<br>
+			<br>
+			Post processing:<br>
+			move curve nodal points to redraw curve.
+			<br>
+			<a href="crvsmth.html" title="Learn about modifier keys, advanced operations, etc.">Learn more...</a>
+		  </td>
+		</tr>
+		
+		<tr>
+		  <td class="specif_tbl_val"><img src="images/buttons/pnts2mesh_24.gif" valign="top">&nbsp;<a href="pnts2mesh.html">Make 3D Mesh</a></td>
+		  <td class="brief_info">Draw curved 3D mesh interactively</td>
+		</tr>
+		<tr>
+		  <td class="specif_tbl_val"><a href="pnts2mesh.html"><img src="images/pnts2mesh.gif" onmouseover="img_over(this)" onmouseout="img_out(this)" border="0"></a></td>
+		  <td class="specif_tbl_data">
+			Tool processing:
+			<ul>
+				<li>open tool dialog</li>
+				<li>adjust settings</li>
+				<li>draw nodal points of the surface interactively</li>
+				<li>apply or double-click the last nodal point to generate smoothed 3D surface</li>
+			</ul>
+			<br>
+			Post processing:<br>
+			move surface nodal points to rebuild generated surface.
+			<br>
+			<a href="pnts2mesh.html" title="Learn about modifier keys, advanced operations, etc.">Learn more...</a>
+		  </td>
+		</tr>
+		
+		<tr>
+		  <td class="specif_tbl_val"><img src="images/buttons/ctrlpnts_24.gif" valign="top">&nbsp;<a href="ctrlpnts.html">Control Points</a></td>
+		  <td class="brief_info">Deform geometry group by moving attached control points</td>
+		</tr>
+		<tr>
+		  <td class="specif_tbl_val"><a href="ctrlpnts.html"><img src="images/ctrlpnts.gif" onmouseover="img_over(this)" onmouseout="img_out(this)" border="0"></a></td>
+		   <td class="specif_tbl_data">
+			Tool processing:
+			<ul>
+				<li>open tool dialog</li>
+				<li>pick geometry group to deform</li>
+				<li>add some control points interactively</li>
+				<li>drag control points to view deformations (optional step, since it is possible to interact with control points any time later)</li>
+				<li>adjust settings, apply settings to generate deformed group</li>
+			</ul>
+			<br>
+			Post processing:<br>
+			interact with generated control points for further deformation of generated group.
+			<br>
+			<a href="ctrlpnts.html" title="Learn about modifier keys, advanced operations, etc.">Learn more...</a>
+		  </td>
+		</tr>
+		
+		<tr>
+		  <td class="specif_tbl_val"><img src="images/buttons/mshstick_24.gif" valign="top">&nbsp;<a href="mshstick.html">Stick Group</a></td>
+		  <td class="brief_info">Stick geometry group to any surface in an active model</td>
+		</tr>
+		<tr>
+		  <td class="specif_tbl_val"><a href="mshstick.html"><img src="images/mshstick.gif" onmouseover="img_over(this)" onmouseout="img_out(this)" border="0"></a></td>
+		  <td class="specif_tbl_data">
+			Tool processing:
+			<ul>
+				<li>open tool dialog</li>
+				<li>pick geometry group to stick</li>
+				<li>adjust settings</li>
+				<li>apply settings to generate sticked group based on picked one</li>
+			</ul>
+			<br>
+			Post processing:<br>
+			interact with initially picked group to rebuild sticked group.
+			<br>
+			<a href="mshstick.html" title="Learn about modifier keys, advanced operations, etc.">Learn more...</a>
+		  </td>
+		</tr>
+		
+		<tr>
+		  <td class="specif_tbl_val"><img src="images/buttons/fllwedgs_24.gif" valign="top">&nbsp;<a href="fllwedgs.html">Follow Edges</a></td>
+		  <td class="brief_info">Pick face to follow edges of selected geometry group</td>
+		</tr>
+		<tr>
+		  <td class="specif_tbl_val"><a href="fllwedgs.html"><img src="images/fllwedgs.gif" onmouseover="img_over(this)" onmouseout="img_out(this)" border="0"></a></td>
+		  <td class="specif_tbl_data">
+			Tool processing:
+			<ul>
+				<li>open tool dialog</li>
+				<li>pick geometry group to follow its edges</li>
+				<li>pick face to follow group's edges</li>
+				<li>pick joint component (optional step)</li>
+				<li>adjust settings (such as joint type, joint size, offset from surface and alignment options)</li>
+				<li>apply settings to generate 'Follow Edges' object</li>
+			</ul>
+			<br>
+			Post processing:<br>
+			modify picked group, picked face or joint component (if any) to rebuild results.
+			<br>
+			<a href="fllwedgs.html" title="Learn about modifier keys, advanced operations, etc.">Learn more...</a>
+		  </td>
+		</tr>
+		
+		<tr>
+		  <td class="specif_tbl_val"><img src="images/buttons/voxelate_24.gif" valign="top">&nbsp;<a href="voxelate.html">Voxelate</a></td>
+		  <td class="brief_info">Voxelate selected geometry group</td>
+		</tr>
+		<tr>
+		  <td class="specif_tbl_val"><a href="voxelate.html"><img src="images/voxelate.gif" onmouseover="img_over(this)" onmouseout="img_out(this)" border="0"></a></td>
+		  <td class="specif_tbl_data">
+			Tool processing:
+			<ul>
+				<li>open tool dialog</li>
+				<li>pick geometry group to voxelate</li>
+				<li>pick voxel component (optional step)</li>
+				<li>adjust settings (first of all voxel size and voxel type)</li>
+				<li>apply settings to generate voxelated object based on picked group</li>
+			</ul>
+			<br>
+			Post processing:<br>
+			modify picked group to rebuild generated group of voxels.
+			<br>
+			<a href="voxelate.html" title="Learn about modifier keys, advanced operations, etc.">Learn more...</a>
+		  </td>
+		</tr>
+		
+		<tr>
+		  <td class="specif_tbl_val"><img src="images/buttons/recursive_24.gif" valign="top">&nbsp;<a href="recursive.html">Make Recursive</a></td>
+		  <td class="brief_info">Make selected group recursively defined</td>
+		</tr>
+		<tr>
+		  <td class="specif_tbl_val"><a href="recursive.html"><img src="images/recursive.gif" onmouseover="img_over(this)" onmouseout="img_out(this)" border="0"></a></td>
+		  <td class="specif_tbl_data">
+			Use this tool to generate simple fractals.<br>
+			Tool processing:
+			<ul>
+				<li>open tool dialog</li>
+				<li>pick geometry group to make it recursively defined</li>
+				<li>set recursion depth</li>
+				<li>apply settings to generate recursively defined group from picked one</li>
+			</ul>
+			<br>
+			Post processing:<br>
+			interact with generated recursively defined group to achieve desired results
+			(open generated group, find and select nested group in it, then move/rotate/scale/copy nested group and take a look at results).
+			<br>
+			<a href="recursive.html" title="Learn about modifier keys, advanced operations, etc.">Learn more...</a>
+		  </td>
+		</tr>
+		
+		<tr>
+		  <td class="specif_tbl_sub_hdr">Commands</td>
+		  <td></td>
+		</tr>
+		<tr>
+		  <td class="specif_tbl_val"><img src="images/buttons/refresh_24.gif" border="0" valign="top">&nbsp;<a href="refresh.html">Refresh</a></td>
+		  <td class="brief_info">Refreshes created LSS object(s)</td>
+		</tr>
+		<tr>
+		  <td class="specif_tbl_val"><img src="images/buttons/observe_24.gif" border="0" valign="top">&nbsp;<a href="observe.html">Observe Changes...</a></td>
+		  <td class="brief_info">Observes state of move and scale tools and automatically refreshes detected LSS object(s)</td>
+		</tr>
+		<tr>
+		  <td class="specif_tbl_val"><img src="images/buttons/props_24.gif" border="0" valign="top">&nbsp;<a href="props.html">Edit Entity Properties...</a></td>
+		  <td class="brief_info">Displays properties dialog to view and edit properties of an object created using 'LSS Toolbar'</td>
+		</tr>
+	</tbody>
+ </table>
+<p>&nbsp;</p> 
+</body>
+</html>

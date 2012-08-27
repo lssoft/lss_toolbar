@@ -1,0 +1,136 @@
+.body
+{ font: 100%  Helvetica, Arial, sans-serif;
+  margin-right:0em;
+  margin-left:0em;
+  line-height: 1.25em;
+  color:#636363; 
+  background: white
+}
+.blacksubheader 
+{ font-size:1.1em;
+  font-weight:bold;
+  color:#666666; 
+}
+
+.blackheader 
+{ font-size:1.5em;
+	font-weight:bold;
+	color:black; 
+}
+
+ol			
+{ list-style-type: decimal;
+	padding: 0;
+	margin: 0;
+	margin-left: 1.5em;
+}
+ul			
+{ list-style-type: circle;
+	padding: 0;
+	margin: 0;
+	margin-left: 1.5em;
+}
+p			{ margin-bottom: 0; }
+a			
+{ 	color: red;
+	text-decoration:none;
+}
+a:hover			
+{ 	color: #666666;
+	text-decoration:none;
+	text-shadow: black 1px 1px 2px, black 0px 0px 0.5em;
+}
+.note
+{ font-style:italic;
+  color:#666666;
+}
+.specification_tbl
+{ 	border:0;
+	padding:0;
+	margin:0;
+	width:100%;
+	border-spacing:0;
+}
+.specif_tbl_sub_hdr
+{	font-weight:bold;
+	vertical-align: middle;
+	background: white;
+	height: 32px;
+	color:#666666;
+	padding:0.5em;
+}
+.specif_tbl_data
+{	
+	background: white;
+	padding:0.5em;
+	vertical-align:top;
+}
+.specif_tbl_val
+{	
+	background: white;
+	padding:0.5em;
+	color:red;
+	vertical-align:top;
+	font-weight:bold;
+	width: 320px;
+}
+.page_tbl
+{ 	border:0;
+	border-width:0;
+	padding:0;
+	margin:0;
+	width:100%;
+	border-spacing:0;
+}
+.navigation
+{	font-size:1em;
+	font-weight:bold;
+	line-height: 1em;
+	width: 320px;
+	vertical-align:top;
+}
+.brief_info
+{
+	background: white;
+	padding:0.5em;
+	vertical-align:top;
+	font-weight:bold;
+}
+.help_header
+{
+	font-size:2em;
+	font-weight:bold;
+	background: #A6A6A6 url(images/hdr_back.gif) repeat-x;
+	vertical-align: middle;
+	color:white;
+	padding:0px;
+	height: 64px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.help_footer
+{
+	font-size:0.8em;
+	font-weight:bold;
+	background: #A6A6A6 url(images/hdr_back.gif) repeat-x;
+	vertical-align: middle;
+	color:white;
+	padding:0px;
+	height: 32px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.help_footer_font
+{
+	font-size:0.8em;
+	font-weight:bold;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.footer_a
+{
+	color:white;
+}

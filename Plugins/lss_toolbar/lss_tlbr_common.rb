@@ -101,6 +101,19 @@ class Lss_Common_Cmds
 		props_cmd.tooltip = $lsstoolbarStrings.GetString("Select an entity, then click to view/edit its properties.")
 		$lssToolbar.add_item(props_cmd)
 		$lssMenu.add_item(props_cmd)
+		
+		lsstlbr_help_cmd=UI::Command.new($lsstoolbarStrings.GetString("Help System")){
+			@resource_dir = File.dirname(Sketchup.get_resource_path("lss_toolbar.strings"))
+			@index_path="#{@resource_dir}/lss_toolbar/instruct/index.html"
+			UI.openURL(@index_path)
+		}
+		lsstlbr_help_cmd.small_icon = "./tb_icons/help_16.png"
+		lsstlbr_help_cmd.large_icon = "./tb_icons/help_24.png"
+		lsstlbr_help_cmd.tooltip = $lsstoolbarStrings.GetString("Click to view LSS Toolbar documentation and manuals")
+		$lssMenu.add_separator
+		$lssToolbar.add_separator
+		$lssToolbar.add_item(lsstlbr_help_cmd)
+		$lssMenu.add_item(lsstlbr_help_cmd)
 
 		lsstlbr_visit_cmd=UI::Command.new($lsstoolbarStrings.GetString("Visit Program Website...")){
 			UI.openURL("http://sites.google.com/site/lssoft2011/home/lss-toolbar")
@@ -108,8 +121,6 @@ class Lss_Common_Cmds
 		lsstlbr_visit_cmd.small_icon = "./tb_icons/tlbr_www_16.png"
 		lsstlbr_visit_cmd.large_icon = "./tb_icons/tlbr_www_24.png"
 		lsstlbr_visit_cmd.tooltip = $lsstoolbarStrings.GetString("Click to visit LSS Toolbar website")
-		$lssMenu.add_separator
-		$lssToolbar.add_separator
 		$lssToolbar.add_item(lsstlbr_visit_cmd)
 		$lssMenu.add_item(lsstlbr_visit_cmd)  
 

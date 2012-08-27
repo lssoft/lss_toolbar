@@ -1,6 +1,6 @@
 LSS Toolbar ver. 2.0 (beta)
 Plugin for Sketchup.
-Set of tools, which provides new geometry creation and advanced manipulation.
+Set of tools, which provide advanced geometry creation and manipulation.
 
 www: http://sites.google.com/site/lssoft2011/home/lss-toolbar
 E-mail1: designer@ls-software.ru

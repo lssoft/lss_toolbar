@@ -1,0 +1,36 @@
+<html>
+<head>
+<title>Observe Changes Command</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="help.css" rel="stylesheet" type="text/css">
+</head>
+<body class="body">
+    <p><a href="index.html"><span class="blackheader">Observe Changes Command</span></a></p>
+	<p><span class="blacksubheader">Brief</span> </p> 
+	Observes state of move and scale tools and automatically refreshes detected 'LSS Object(s)'<br>
+	
+	<p><span class="blacksubheader">Usage</span> </p> 
+	<ol>
+		<li>click <img src="../images/buttons/observe_24.gif" border="0" valign="top"> command button of 'LSS&nbsp;Toolbar' or choose 'Observe Changes' command from 'Sketchup&nbsp;Main&nbsp;Menu>>Plugins>>LSS&nbsp;Tools'</li>
+		<li>move or scale 'initial' or 'utility' entities of existing 'LSS Object(s)'</li>
+	</ol>
+
+	
+	<p><span class="blacksubheader">Note</span> </p> 
+	<div class="note">
+		The result of any 'LSS Toolbar' tool processing is not just a set of new geometric entities but an object,
+		which allows interaction after tool processing completion.<br>
+		Each 'LSS Object' has two basic parts:
+		<ul>
+			<li>'passive' part &mdash; new geometric entities (a direct result of tool processing)</li>
+			<li>'active' part &mdash; existing (initial) and/or newly generated (utility) entities</li>
+		</ul>
+		So it is possible to continue interaction with an object by modifying its 'active' part.<br>
+		There are two ways to refresh object's 'passive' part after 'active' part modification:
+		<ul>
+			<li><img src="../images/buttons/refresh_24.gif" border="0" valign="top"> manual &mdash; 'Refresh' command</li>
+			<li><img src="../images/buttons/observe_24.gif" border="0" valign="top"> automatic &mdash; 'Observe Changes' command</li>
+		</ul>
+	</div>
+</body>
+</html>

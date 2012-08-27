@@ -142,14 +142,36 @@ class Lss_Fllwedgs_Entity
 				@edge_normals<<norm
 				@edge_visibility<<ent.soft?
 				st_norm=Geom::Vector3d.new
+				norm_arr=Array.new
 				ent.start.faces.each{|vrt_fc|
-					st_norm+=vrt_fc.normal.normalize
-					st_norm.normalize!
+					add_norm=true
+					norm_arr.each{|norm|
+						if norm
+							if norm.length>0
+								add_norm=false if norm.samedirection?(vrt_fc.normal)
+							end
+						end
+					}
+					norm_arr<<vrt_fc.normal.normalize if add_norm
 				}
+				norm_arr.each{|norm|
+					st_norm+=norm
+				}
+				norm_arr=Array.new
 				end_norm=Geom::Vector3d.new
 				ent.end.faces.each{|vrt_fc|
-					end_norm+=vrt_fc.normal.normalize
-					end_norm.normalize!
+					add_norm=true
+					norm_arr.each{|norm|
+						if norm
+							if norm.length>0
+								add_norm=false if norm.samedirection?(vrt_fc.normal)
+							end
+						end
+					}
+					norm_arr<<vrt_fc.normal.normalize if add_norm
+				}
+				norm_arr.each{|norm|
+					end_norm+=norm
 				}
 				@edge_verts_normals<<[st_norm, end_norm]
 				if @align_joint_comp=="true"
@@ -697,7 +719,7 @@ class Lss_Fllwedgs_Tool
 	def write_defaults
 		self.settings2hash
 		@settings_hash.each_key{|key|
-			Sketchup.write_default("LSS_Recursive", key, @settings_hash[key][0].to_s)
+			Sketchup.write_default("LSS_Fllwedgs", key, @settings_hash[key][0].to_s)
 		}
 		self.write_prop_types
 	end

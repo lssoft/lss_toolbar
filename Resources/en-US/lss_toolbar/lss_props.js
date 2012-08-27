@@ -190,8 +190,9 @@ function build_props_list(){
 				name_div.style.display="inline-block";
 				name_div.style.width="100%";
 				name_div.style.maxWidth="100%";
-				name_div.innerHTML = props_list[i][2];
-				name_div.title = props_list[i][2];
+				//Next 2 lines are to be localized
+				name_div.innerHTML = "Entity type";
+				name_div.title = "'LSS Toolbar' entity type";
 				nameCell.appendChild(name_div);
 				oRow.appendChild(nameCell);
 				valCell = document.createElement("TD");

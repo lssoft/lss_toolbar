@@ -20,8 +20,8 @@ $lsspropsStrings = LanguageHandler.new("lss_props.strings")
 
 lsstlbr_ext = SketchupExtension.new($lsstoolbarStrings.GetString("LSS Toolbar"), "lss_toolbar/lss_tlbr_loader.rb")
 
-lsstlbr_ext.description=$lsstoolbarStrings.GetString("Set of tools, which provides new geometry creation and advanced manipulation.")
+lsstlbr_ext.description=$lsstoolbarStrings.GetString("This is a set of tools for advanced geometry creation and manipulation.")
 lsstlbr_ext.copyright="(c)2012, Links System Software"
-lsstlbr_ext.version="2.0 13-May-12"
+lsstlbr_ext.version="2.0 beta 27-Aug-12"
 lsstlbr_ext.creator="Links System Software"
 Sketchup.register_extension(lsstlbr_ext, true)
