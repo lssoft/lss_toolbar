@@ -1,7 +1,7 @@
 var prop_dicts={};
 var select_lists={};
 var select_local_lists={};
-var delimeter=",";
+var delimiter=",";
 
 function get_prop_dict(prop_dict_str) {
 	prop_dicts[prop_dict_str]=new Array ();
@@ -14,6 +14,7 @@ function get_property(prop_str){
 	var dict=prop[0];
 	var prop_name=prop[1];
 	var prop_val=prop[2];
+	prop_val=prop_val.replace("*", "\'"); // Added 01-Sep-12 it is a fix of unterminated string constant problem when units are set to feet
 	var name_alias=prop[3];
 	var prop_type=prop[4];
 	if (name_alias=="") {
@@ -34,8 +35,8 @@ function change_property(prop_str){
 	}
 	id_str=dict + delimiter + prop_name;
 	var prop_ctrl=document.getElementById(id_str);
-	prop_ctrl.value=prop_val;
-	act_name="obtain_setting"+ delimiter + id_str + delimeter + prop_val;
+	prop_ctrl.value=prop_val.replace("*", "\'"); // Added 01-Sep-12 asterisk replaces feet sign
+	var act_name="obtain_setting"+ delimiter + id_str + delimiter + prop_val // Note that SU Ruby method 'parse_length' parses asterisk instead of quot sign too 
 	callRuby(act_name);
 	load_props();
 }
@@ -59,7 +60,7 @@ function get_local_list(local_list_str){
 
 
 function ctrl_onchange(evt){
-	act_name="obtain_setting"+ delimiter + this.id + delimeter + this.value;
+	act_name="obtain_setting"+ delimiter + this.id + delimiter + this.value.replace(delimiter, ".").replace("'", "*");
 	callRuby(act_name);
 	load_props();
 }
@@ -67,14 +68,14 @@ function ctrl_onchange(evt){
 function color_onchange(evt){
 	delete jscolor.picker.owner;
 	document.getElementsByTagName('body')[0].removeChild(jscolor.picker.boxB);
-	act_name="obtain_setting"+ delimiter + this.id + delimeter + this.value;
+	act_name="obtain_setting"+ delimiter + this.id + delimiter + this.value;
 	callRuby(act_name);
 	load_props();
 }
 
 function key_dwn_prop(evt) {
 	if (event.keyCode==13) {
-		act_name="obtain_setting"+ delimiter + this.id + delimeter + this.value;
+		act_name="obtain_setting"+ delimiter + this.id + delimiter + this.value.replace(delimiter, ".").replace("'", "*");
 		callRuby(act_name);
 		load_props();
 	}

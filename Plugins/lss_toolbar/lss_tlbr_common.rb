@@ -288,7 +288,10 @@ class Lss_Properties_Dialog
 				case prop_type
 					when "distance"
 					dist=Sketchup.parse_length(setting_val)
-					setting_dict[setting_name]=dist
+					if dist.nil?
+						dist=Sketchup.parse_length(setting_val.gsub(".",","))
+					end
+					setting_dict[setting_name]=dist.to_s
 					when "integer"
 					int=setting_val.to_i
 					setting_dict[setting_name]=int
@@ -366,7 +369,8 @@ class Lss_Properties_Dialog
 					case prop_type
 						when "distance"
 						dist=Sketchup.format_length(dict[key].to_f).to_s
-						prop_str=dict.name + "|" + key + "|" + dist + "|" + name_alias + "|" + prop_type
+						# Added .gsub("'", "*") 01-Sep-12 in order to fix unterminated string constant problem when units are set to feet.
+						prop_str=dict.name + "|" + key + "|" + dist.gsub("'", "*") + "|" + name_alias + "|" + prop_type
 						when "color"
 						hex_str=dict[key].to_s(16).upcase
 						prop_str=dict.name + "|" + key + "|" + hex_str + "|" + name_alias + "|" + prop_type
@@ -498,7 +502,7 @@ class Lss_Pick_Distance_Tool
 		if @first_pt and @second_pt
 			model_dist=@first_pt.distance(@second_pt)
 			dist=Sketchup.format_length(model_dist).to_s
-			prop_str=@dict_name + "|" + @key + "|" + dist + "|" + @name_alias + "|" + @prop_type
+			prop_str=@dict_name + "|" + @key + "|" + dist.gsub("'", "*").gsub(",", ".") + "|" + @name_alias + "|" + @prop_type
 			js_command = "change_property('" + prop_str + "')" if prop_str
 			@web_dial.execute_script(js_command) if js_command
 		end
@@ -824,7 +828,7 @@ class Lss_Pick_Vector_Tool
 	
 	def send_settings2dlg
 		if @first_pt and @second_pt
-			vec_str=@first_pt.vector_to(@second_pt).to_a.join(";")
+			vec_str=@first_pt.vector_to(@second_pt).to_a.join(";") # Fixed 01-Sep-12 made join(";") instead of join(",")
 			prop_str=@dict_name + "|" + @key + "|" + vec_str + "|" + @name_alias + "|" + @prop_type
 			js_command = "change_property('" + prop_str + "')" if prop_str
 			@web_dial.execute_script(js_command) if js_command

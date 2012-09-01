@@ -421,7 +421,7 @@ class Lss_Pnts2mesh_Entity
 	
 	def pre_calc_horizontals
 		return if @result_surface_points.nil?
-		return if @horizontals_step==0
+		return if @horizontals_step.to_f==0
 		@horizontal_points=Array.new
 		step_offset_vec=Geom::Vector3d.new(0,0,1)
 		bb=Geom::BoundingBox.new
@@ -1150,7 +1150,11 @@ class Lss_Pnts2mesh_Tool
 				if @settings_hash[key]
 					case @settings_hash[key][1]
 						when "distance"
-						@settings_hash[key][0]=Sketchup.parse_length(val)
+						dist=Sketchup.parse_length(val)
+						if dist.nil?
+							dist=Sketchup.parse_length(val.gsub(".",","))
+						end
+						@settings_hash[key][0]=dist
 						when "integer"
 						@settings_hash[key][0]=val.to_i
 						else
@@ -1214,7 +1218,9 @@ class Lss_Pnts2mesh_Tool
 		self.settings2hash
 		@settings_hash.each_key{|key|
 			if @settings_hash[key][1]=="distance"
-				setting_pair_str= key.to_s + "|" + Sketchup.format_length(@settings_hash[key][0].to_f).to_s
+				# Modified 01-Sep-12 in order to fix unterminated string constant problem when units are set to feet
+				dist_str=Sketchup.format_length(@settings_hash[key][0].to_f).to_s
+				setting_pair_str= key.to_s + "|" + dist_str.gsub("'", "*")
 			else
 				setting_pair_str= key.to_s + "|" + @settings_hash[key][0].to_s
 			end

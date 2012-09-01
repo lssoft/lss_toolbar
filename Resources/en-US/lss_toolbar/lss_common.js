@@ -7,6 +7,7 @@ function callRuby(actionName) {
 }
 
 function get_setting(setting_pair_str) {
+	setting_pair_str=setting_pair_str.replace("*", "\'"); // Added 01-Sep-12 it is a fix of unterminated string constant problem when units are set to feet
 	var setting_pair=setting_pair_str.split("|");
 	settings_arr.push(setting_pair);
 }
@@ -148,7 +149,7 @@ function send_setting(setting_control) {
 		act_name="obtain_setting"+ delimiter+ setting_control.id+ delimiter +setting_control.checked;
 	}
 	else {
-		act_name="obtain_setting"+ delimiter+ setting_control.id+ delimiter +setting_control.value;
+		act_name="obtain_setting"+ delimiter+ setting_control.id+ delimiter +setting_control.value.replace(delimiter, ".").replace("'", "*");
 	}
 	callRuby(act_name);
 	callRuby('get_settings');
