@@ -21,6 +21,13 @@ function point_pt() {
 	custom_reset();
 }
 
+function get_pnt_cloud() {
+	actionName="get_pnt_cloud";
+	callRuby(actionName);
+	custom_reset();
+}
+
+
 function get_nodal_point(point_str) {
 	var pt=point_str;
 	nodal_points.push(pt);
@@ -108,25 +115,27 @@ function custom_init() {
 		if (soft_surf=="true" && smooth_surf=="true"){
 			radio_click(document.getElementById("soft_smooth"));
 		}
-		if (settings_arr[i][0]=="calc_alg"){
-			var calc_alg=settings_arr[i][1];
-			if (calc_alg=="distance") {
-				radio_click(document.getElementById("distance"));
+		if (settings_arr[i]){
+			if (settings_arr[i][0]=="calc_alg"){
+				var calc_alg=settings_arr[i][1];
+				if (calc_alg=="distance") {
+					radio_click(document.getElementById("distance"));
+				}
+				if (calc_alg=="average") {
+					radio_click(document.getElementById("average"));
+				}
+				if (calc_alg=="minimize") {
+					radio_click(document.getElementById("minimize"));
+				}
 			}
-			if (calc_alg=="average") {
-				radio_click(document.getElementById("average"));
-			}
-			if (calc_alg=="minimize") {
-				radio_click(document.getElementById("minimize"));
-			}
-		}
-		if (settings_arr[i][0]=="horizontals_origin"){
-			var calc_alg=settings_arr[i][1];
-			if (calc_alg=="world") {
-				radio_click(document.getElementById("world"));
-			}
-			if (calc_alg=="local") {
-				radio_click(document.getElementById("local"));
+			if (settings_arr[i][0]=="horizontals_origin"){
+				var calc_alg=settings_arr[i][1];
+				if (calc_alg=="world") {
+					radio_click(document.getElementById("world"));
+				}
+				if (calc_alg=="local") {
+					radio_click(document.getElementById("local"));
+				}
 			}
 		}
 	}

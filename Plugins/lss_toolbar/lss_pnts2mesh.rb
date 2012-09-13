@@ -1186,6 +1186,12 @@ class Lss_Pnts2mesh_Tool
 				self.hash2settings
 				@surface_col.alpha=1.0-@transp_level/100.0
 			end
+			if action_name=="get_pnt_cloud"
+				self.load_pnt_cloud
+				self.send_settings2dlg
+				view=Sketchup.active_model.active_view
+				view.invalidate
+			end
 			if action_name=="reset"
 				view=Sketchup.active_model.active_view
 				self.reset(view)
@@ -1201,18 +1207,170 @@ class Lss_Pnts2mesh_Tool
 		@pnts2mesh_dialog.set_on_close{
 			self.write_defaults
 			Sketchup.active_model.select_tool(nil)
+			if @preview_pnts_cloud_dialog
+				if @preview_pnts_cloud_dialog.visible?
+					@preview_pnts_cloud_dialog.close
+				end
+			end
 		}
 	end
 	
 	def activate
-		@ip = Sketchup::InputPoint.new
-		@ip1 = Sketchup::InputPoint.new
-		self.create_web_dial
-		
 		@model=Sketchup.active_model
 		@selection=@model.selection
 		self.selection_filter
+	
+		@ip = Sketchup::InputPoint.new
+		@ip1 = Sketchup::InputPoint.new
+		self.create_web_dial
 	end
+	
+	def load_pnt_cloud
+		#Settings
+		@split_symbol=","
+		
+		pnt_cloud_file_path=UI.openpanel("Open Point Cloud File", "c:\\", "*.csv")
+		@pnt_cloud_file=open(pnt_cloud_file_path)
+		@pnt_cloud_str=@pnt_cloud_file.read
+		
+		# Create the WebDialog instance
+		@preview_pnts_cloud_dialog = UI::WebDialog.new($lsstoolbarStrings.GetString("Table Preview"), true, "LSS Table Preview", 350, 400, 200, 200, true)
+		@preview_pnts_cloud_dialog.max_width=550
+		@preview_pnts_cloud_dialog.min_width=380
+		
+		# Attach an action callback
+		@preview_pnts_cloud_dialog.add_action_callback("get_data") do |web_dialog,action_name|
+			view=Sketchup.active_model.active_view
+			if action_name=="get_table_content" # From Ruby to web-dialog
+				self.send_table2dlg
+				view=Sketchup.active_model.active_view
+				view.invalidate
+			end
+			if action_name=="get_file_content" # From Ruby to web-dialog
+				js_command = "get_file_content('" + @pnt_cloud_str[0, 200].inspect + "')" if @pnt_cloud_str
+				@preview_pnts_cloud_dialog.execute_script(js_command) if js_command
+			end
+			if action_name=="generate_pnt_cloud"
+				point_cloud_grp=@model.entities.add_group
+				prgr_bar=Lss_Toolbar_Progr_Bar.new(@pnt_cloud_arr.length,"|","_",2)
+				@pnt_cloud_arr.each_index{|ind|
+					prgr_bar.update(ind)
+					Sketchup.status_text = "#{$lsstoolbarStrings.GetString("Generating point cloud:")} #{prgr_bar.progr_string}"
+					pnt_crd=@pnt_cloud_arr[ind]
+					x=Sketchup.parse_length(pnt_crd[0])
+					if x.nil?
+						x=Sketchup.parse_length(pnt_crd[0].gsub(".", ","))
+					end
+					y=Sketchup.parse_length(pnt_crd[1])
+					if y.nil?
+						y=Sketchup.parse_length(pnt_crd[1].gsub(".", ","))
+					end
+					z=Sketchup.parse_length(pnt_crd[2])
+					if z.nil?
+						z=Sketchup.parse_length(pnt_crd[2].gsub(".", ","))
+					end
+					x=(x-@x_origin)*@x_scale
+					y=(y-@y_origin)*@y_scale
+					z=(z-@z_origin)*@z_scale
+					pt=Geom::Point3d.new(x,y,z)
+					point_cloud_grp.entities.add_cpoint(pt)
+				}
+				Sketchup.status_text = ""
+				vec2zero=point_cloud_grp.bounds.min.vector_to(Geom::Point3d.new(0,0,0))
+				offset_tr=Geom::Transformation.new(vec2zero)
+				point_cloud_grp.transformation=offset_tr
+			end
+			if action_name.split("|")[0]=="obtain_scale_coeffs"
+				@x_scale=action_name.split("|")[1].to_f
+				@y_scale=action_name.split("|")[2].to_f
+				@z_scale=action_name.split("|")[3].to_f
+			end
+			if action_name.split("|")[0]=="obtain_origin_values"
+				@x_origin=action_name.split("|")[1]
+				@y_origin=action_name.split("|")[2]
+				@z_origin=action_name.split("|")[3]
+				@x_origin=Sketchup.parse_length(@x_origin)
+				if @x_origin.nil?
+					@x_origin=Sketchup.parse_length(action_name.split("|")[1].gsub(".", ","))
+				end
+				@y_origin=Sketchup.parse_length(@y_origin)
+				if @y_origin.nil?
+					@y_origin=Sketchup.parse_length(action_name.split("|")[2].gsub(".", ","))
+				end
+				@z_origin=Sketchup.parse_length(@z_origin)
+				if @z_origin.nil?
+					@z_origin=Sketchup.parse_length(action_name.split("|")[3].gsub(".", ","))
+				end
+			end
+			if action_name=="process_pnt_cloud"
+				self.process_pnt_cloud
+			end
+		end
+		resource_dir = File.dirname(Sketchup.get_resource_path("lss_toolbar.strings"))
+		html_path = "#{resource_dir}/lss_toolbar/table_preview.html"
+		@preview_pnts_cloud_dialog.set_file(html_path)
+		@preview_pnts_cloud_dialog.show()
+		@preview_pnts_cloud_dialog.set_on_close{
+			if not(@pnt_cloud_file.closed?)
+				@pnt_cloud_file.close
+			end
+		}
+	end
+	
+	def process_pnt_cloud
+		@nodal_points=Array.new
+		prgr_bar=Lss_Toolbar_Progr_Bar.new(@pnt_cloud_arr.length,"|","_",2)
+		@pnt_cloud_arr.each_index{|ind|
+			prgr_bar.update(ind)
+			Sketchup.status_text = "#{$lsstoolbarStrings.GetString("Processing point cloud:")} #{prgr_bar.progr_string}"
+			pnt_crd=@pnt_cloud_arr[ind]
+			x=Sketchup.parse_length(pnt_crd[0])
+			if x.nil?
+				x=Sketchup.parse_length(pnt_crd[0].gsub(".", ","))
+			end
+			y=Sketchup.parse_length(pnt_crd[1])
+			if y.nil?
+				y=Sketchup.parse_length(pnt_crd[1].gsub(".", ","))
+			end
+			z=Sketchup.parse_length(pnt_crd[2])
+			if z.nil?
+				z=Sketchup.parse_length(pnt_crd[2].gsub(".", ","))
+			end
+			x=(x-@x_origin)*@x_scale
+			y=(y-@y_origin)*@y_scale
+			z=(z-@z_origin)*@z_scale
+			pt=Geom::Point3d.new(x,y,z)
+			@nodal_points<<pt
+		}
+		Sketchup.status_text = ""
+		self.send_settings2dlg
+	end
+	
+	def send_table2dlg
+		@pnt_cloud_arr=Array.new
+		lines_count = 0
+		@pnt_cloud_str.each_line{ |line| lines_count+=1 }
+		prgr_bar=Lss_Toolbar_Progr_Bar.new(lines_count,"|","_",2)
+		line_no=0
+		@pnt_cloud_str.each_line{|line|
+			prgr_bar.update(line_no)
+			Sketchup.status_text = "#{$lsstoolbarStrings.GetString("Getting data:")} #{prgr_bar.progr_string}"
+			line_no+=1
+			pnt_crds_arr=line.split(@split_symbol)
+			pnt_crds_arr.each{|crd|
+				crd.delete(" ")
+				crd.delete("\"")
+				crd.chomp!
+			}
+			@pnt_cloud_arr<<pnt_crds_arr
+			js_command = "get_table_line('" + pnt_crds_arr.join("|") + "')" if pnt_crds_arr
+			@preview_pnts_cloud_dialog.execute_script(js_command) if js_command
+		}
+		Sketchup.status_text = ""
+		js_command = "build_table()"
+		@preview_pnts_cloud_dialog.execute_script(js_command) if js_command
+	end
+	
 	
 	def send_settings2dlg
 		self.settings2hash

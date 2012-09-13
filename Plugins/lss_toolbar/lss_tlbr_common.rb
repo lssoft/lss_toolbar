@@ -244,6 +244,10 @@ class Lss_Properties_Dialog
 		
 		# Attach an action callback
 		@properties_dialog.add_action_callback("get_data") do |web_dialog,action_name|
+			if action_name=="edit_pathface_control_curve"
+				edit_cc_tool=Lss_Edit_CC_Tool.new
+				Sketchup.active_model.select_tool(edit_cc_tool)
+			end
 			if action_name.split(",")[0]=="pick_distance"
 				setting_dict_name=action_name.split(",")[1]
 				setting_name=action_name.split(",")[2]
@@ -345,55 +349,61 @@ class Lss_Properties_Dialog
 		return if @selection.count==0
 		return if @selection[0].attribute_dictionaries.to_a.length==0
 		@selection[0].attribute_dictionaries.each{|dict|
-			js_command = "get_prop_dict('" + dict.name + "')" if dict
-			@properties_dialog.execute_script(js_command) if js_command
-		}
-		@selection[0].attribute_dictionaries.each{|dict|
-			dict.each_key{|key|
-				if dict[key]
-					name_alias=$lsspropsStrings.GetString(key)
-					prop_type=Sketchup.read_default("LSS_Prop_Types", key)
-					prop_type=@model.get_attribute("LSS_Prop_Types", key) if prop_type.nil?
-					if prop_type=="list"
-						list_str=prop_type+"_"+key
-						list=$lsspropsStrings.GetString(list_str)
-						local_list=$lsspropsStrings.GetString(list)
-					else
-						list=""
-						local_list=""
-					end
-					if name_alias=="Entity type"
-						prop_type="entity_type"
-					end
-					prop_type="" if prop_type.nil?
-					case prop_type
-						when "distance"
-						dist=Sketchup.format_length(dict[key].to_f).to_s
-						# Added .gsub("'", "*") 01-Sep-12 in order to fix unterminated string constant problem when units are set to feet.
-						prop_str=dict.name + "|" + key + "|" + dist.gsub("'", "*") + "|" + name_alias + "|" + prop_type
-						when "color"
-						hex_str=dict[key].to_s(16).upcase
-						prop_str=dict.name + "|" + key + "|" + hex_str + "|" + name_alias + "|" + prop_type
-						when "vector"
-						prop_str=dict.name + "|" + key + "|" + dict[key].to_s + "|" + name_alias + "|" + prop_type
-						when "list"
-						prop_str=dict.name + "|" + key + "|" + dict[key].to_s + "|" + name_alias + "|" + prop_type
-						list_str=dict.name + "|" + key + "|" + list
-						js_command = "get_list('" + list_str + "')" if list_str
-						@properties_dialog.execute_script(js_command) if js_command
-						local_list_str=dict.name + "|" + key + "|" + local_list
-						js_command = "get_local_list('" + local_list_str + "')" if local_list_str
-						@properties_dialog.execute_script(js_command) if js_command
-						when "entity_type"
-						ent_type=$lsspropsStrings.GetString(dict[key])
-						prop_str=dict.name + "|" + key + "|" + ent_type + "|" + name_alias + "|" + prop_type
-						else
-						prop_str=dict.name + "|" + key + "|" + dict[key].to_s + "|" + name_alias + "|" + prop_type
-					end
-					js_command = "get_property('" + prop_str + "')" if prop_str
+			if dict
+				js_command = "get_prop_dict('" + dict.name + "')"
+				if dict.name.to_s[0, 1]!="_" # Internal dictionaries have names started with "_"
 					@properties_dialog.execute_script(js_command) if js_command
 				end
-			}
+			end
+		}
+		@selection[0].attribute_dictionaries.each{|dict|
+			if dict.name.to_s[0, 1]!="_" # Internal dictionaries have names started with "_"
+				dict.each_key{|key|
+					if dict[key]
+						name_alias=$lsspropsStrings.GetString(key)
+						prop_type=Sketchup.read_default("LSS_Prop_Types", key)
+						prop_type=@model.get_attribute("LSS_Prop_Types", key) if prop_type.nil?
+						if prop_type=="list"
+							list_str=prop_type+"_"+key
+							list=$lsspropsStrings.GetString(list_str)
+							local_list=$lsspropsStrings.GetString(list)
+						else
+							list=""
+							local_list=""
+						end
+						if name_alias=="Entity type"
+							prop_type="entity_type"
+						end
+						prop_type="" if prop_type.nil?
+						case prop_type
+							when "distance"
+							dist=Sketchup.format_length(dict[key].to_f).to_s
+							# Added .gsub("'", "*") 01-Sep-12 in order to fix unterminated string constant problem when units are set to feet.
+							prop_str=dict.name + "|" + key + "|" + dist.gsub("'", "*") + "|" + name_alias + "|" + prop_type
+							when "color"
+							hex_str=dict[key].to_s(16).upcase
+							prop_str=dict.name + "|" + key + "|" + hex_str + "|" + name_alias + "|" + prop_type
+							when "vector"
+							prop_str=dict.name + "|" + key + "|" + dict[key].to_s + "|" + name_alias + "|" + prop_type
+							when "list"
+							prop_str=dict.name + "|" + key + "|" + dict[key].to_s + "|" + name_alias + "|" + prop_type
+							list_str=dict.name + "|" + key + "|" + list
+							js_command = "get_list('" + list_str + "')" if list_str
+							@properties_dialog.execute_script(js_command) if js_command
+							local_list_str=dict.name + "|" + key + "|" + local_list
+							js_command = "get_local_list('" + local_list_str + "')" if local_list_str
+							@properties_dialog.execute_script(js_command) if js_command
+							when "entity_type"
+							ent_type=$lsspropsStrings.GetString(dict[key])
+							prop_str=dict.name + "|" + key + "|" + ent_type + "|" + name_alias + "|" + prop_type
+							else
+							prop_str=dict.name + "|" + key + "|" + dict[key].to_s + "|" + name_alias + "|" + prop_type
+						end
+						js_command = "get_property('" + prop_str + "')" if prop_str
+						@properties_dialog.execute_script(js_command) if js_command
+					end
+				}
+			end
 		}
 	end
 end

@@ -65,6 +65,11 @@ a:hover
 	margin: 6;
 }
 
+.header1
+{
+	font: bold 100%  Helvetica, Arial, sans-serif;
+}
+
 .radio_selected
 {
 	background: #A6A6A6 url(images/backs/line.gif);

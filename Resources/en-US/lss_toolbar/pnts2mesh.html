@@ -15,7 +15,7 @@ window.dhx_globalImgPath = "dhtmlxSlider/codebase/imgs/";
 <script type="text/javascript" src="jscolor/jscolor.js"></script>
 <link rel="STYLESHEET" type="text/css" href="dhtmlxSlider/codebase/dhtmlxslider.css">    
 </head>
-<body class="body" onload="obtain_defaults()" onfocus="callRuby('get_settings')" onkeyup="key_up_body(event)">
+<body class="body" onload="obtain_defaults()" onkeyup="key_up_body(event)">
 	<table id="settings_table" class="page_tbl">
 		<tbody id="pnts2mesh_tool_settings">
 			<tr>
@@ -37,6 +37,21 @@ window.dhx_globalImgPath = "dhtmlxSlider/codebase/imgs/";
 								Nodal points
 							</td>
 							<td align="right" valign="top"><input type="button" onclick="point_pt()" size="8" value="Point ++"/><td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell" id="pnts_cell">
+					
+				</td>
+				<td class="setting_cell">
+					<table width=100%>
+						<tr>
+							<td title="Terrain point cloud">
+								Point cloud
+							</td>
+							<td align="right" valign="top"><input type="button" onclick="get_pnt_cloud()" size="8" value="Obtain..." title="Click to load a file with point cloud"/><td>
 						</tr>
 					</table>
 				</td>

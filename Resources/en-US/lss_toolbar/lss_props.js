@@ -211,6 +211,40 @@ function build_props_list(){
 				//Append the element in page (in span).
 				valCell.appendChild(val_input);
 				oRow.appendChild(valCell);
+				if (props_list[i][1]=="first face"){
+					oRow = document.createElement("TR");
+					oTBody.appendChild(oRow);
+					nameCell = document.createElement("TD");
+					nameCell.width="50%";
+					var name_div = document.createElement("DIV");
+					name_div.style.whiteSpace="nowrap";
+					name_div.style.textOverflow="ellipsis";
+					name_div.style.overflow="hidden";
+					name_div.style.display="inline-block";
+					name_div.style.width="100%";
+					name_div.style.maxWidth="100%";
+					//Next 2 lines are to be localized
+					name_div.innerHTML = "Control curve";
+					name_div.title = "Morphing control curve";
+					nameCell.appendChild(name_div);
+					oRow.appendChild(nameCell);
+					valCell = document.createElement("TD");
+					valCell.style.textAlign="right";
+					var btn = document.createElement("input");
+					btn.setAttribute("type", "button");
+					//Next 2 lines are to be localized
+					btn.setAttribute("value", "view/edit...");
+					btn.setAttribute("title", "Open control curve window to view/edit control curve.");
+					btn.setAttribute("size", "4");
+					var btn_id="edit_pathface_control_curve";
+					btn.setAttribute("id", btn_id);
+					btn.onclick = click_side_btn;
+					btn.className="side_btn";
+					btn.style.width="100%";
+					btn.style.textAlign="left";
+					valCell.appendChild(btn);
+					oRow.appendChild(valCell);
+				}
 			}
 		}
 		for (i=0; i<props_list.length; i++)

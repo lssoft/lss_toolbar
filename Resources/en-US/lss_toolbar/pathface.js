@@ -218,6 +218,13 @@ function refresh_path_curve() {
 }
 // Path curve end
 
+// Adjustment curve start
+function edit_adj_crv() {
+	actionName="edit_adj_crv";
+	callRuby(actionName);
+}
+// Adjustment curve end
+
 // Transparency slider start
 function handler(pos,slider){
 	send_slider_val("transp_level", pos);

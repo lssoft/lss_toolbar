@@ -976,15 +976,19 @@ class Lss_Fllwedgs_Tool
 		@selection.each{|ent|
 			if ent.typename == "Group"
 				@init_group=ent
-				break
 			end
 			if ent.typename == "Face"
 				@face=ent
+				@face_pts=Array.new
+				@face.outer_loop.vertices.each{|vrt|
+					@face_pts<<vrt.position
+				}
 			end
 			if ent.typename == "ComponentInstance"
 				@joint_comp=ent
 			end
 		}
+		self.send_settings2dlg
 		@selection.clear
 	end
 

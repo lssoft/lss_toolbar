@@ -21,6 +21,8 @@
 "End"="End";
 "Try to pick a face."="Try to pick a face.";
 "Try to pick a curve."="Try to pick a curve.";
+"Control Curve"="Control Curve";
+"Edit Control Curve..."="Edit Control Curve...";
 //lss_blend.rb
 "Blend..."="Blend...";
 "Click to activate 'Blend...' tool."="Click to activate 'Blend...' tool.";
@@ -59,6 +61,10 @@
 "Finish"="Finish";
 "Cancel Last Node"="Cancel Last Node";
 "Cancel Whole Surface"="Cancel Whole Surface";
+"Table Preview"="Table Preview";
+"Generating point cloud:"="Generating point cloud:";
+"Processing point cloud:"="Processing point cloud:";
+"Getting data:"="Getting data:";
 //lss_ctrlpnts.rb
 "Control Points"="Control Points";
 "Click to activate 'Control Points' tool."="Click to activate 'Control Points' tool.";

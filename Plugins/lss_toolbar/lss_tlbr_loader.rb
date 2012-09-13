@@ -14,6 +14,9 @@
 #initializes $lssToolbar and $lssMenu
 require 'lss_toolbar/lss_toolbar.rb'
 
+#initializes LSS UI classes
+require 'lss_lib/lss_ui.rb'
+
 #initializes '2 Faces Plus Path...' tool
 require 'lss_toolbar/lss_pathface.rb'
 

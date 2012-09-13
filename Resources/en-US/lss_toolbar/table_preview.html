@@ -1,0 +1,61 @@
+<html>
+<head>
+<title>Obtain Point Cloud</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="lss_tool.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="lss_common.js" charset="UTF-8"></script>
+<script type="text/javascript" src="table_preview.js" charset="UTF-8"></script>
+</head>
+<body class="body" onload="load_content()">
+	<table id="settings_table" class="page_tbl">
+		<tbody id="file_cont_preview">
+			<tr>
+				<td class="info_img_cell">
+					
+				</td>
+				<td class="tbl_hdr">
+					&nbsp;File Content Preview
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell">
+					
+				</td>
+				<td class="setting_cell">
+					<div id="file_cont_prev"></div><br>
+				</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+			</tr>
+		</tbody>
+		<tbody id="table_preview">
+			<tr>
+				<td class="info_img_cell">
+					
+				</td>
+				<td class="tbl_hdr">
+					&nbsp;Table Preview
+				</td>
+			</tr>
+			<tr>
+				<td class="info_img_cell">
+					
+				</td>
+				<td class="setting_cell">
+					<div id="table_prev"></div><br>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<br>
+	<table id="bottom_tbl" class="bottom_tbl">
+		<tr>
+			<td align="right" style="white-space: nowrap;">
+				<input type="button" onclick="process_pnt_cloud()" value="Process Cloud" title="Click to read table contents and process points, i.e. calculate terrain surface."/>
+				<input type="button" onclick="generate_pnt_cloud()" value="Generate Cloud" title="Click to generate point cloud without processing it, i.e. without calculating a surface."/>
+			</td>
+		</tr>
+	</table>	
+</body>
+</html>

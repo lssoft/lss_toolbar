@@ -143,6 +143,36 @@ window.dhx_globalImgPath = "dhtmlxSlider/codebase/imgs/";
 				</td>
 			</tr>
 			<tr>
+				<td class="info_img_cell" id="adj_curve_cell">
+					<div id="adj_crv_canvas" style="overflow:hidden;position:relative;width:32px;height:32px;" title="Adjustment curve thumbnail"></div>
+				</td>
+				<td class="setting_cell">
+					<table width=100%>
+						<tr>
+							<td>
+								Control curve
+							</td>
+							<td align="right" valign="top"><input type="button" onclick="edit_adj_crv()" value="Edit  >>"/><td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+				<tr>
+				<td class="info_img_cell">
+				
+				</td>
+				<td class="setting_cell">
+					<table width=100%>
+						<tr>
+							<td title="Times of the control curve reps">
+								Times
+							</td>
+							<td align="right" valign="top"><input type="text" id="control_curve_times" value="1" size="6" onchange="send_setting(this)" onkeydown="key_dwn(this)"><td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
 				<td class="info_img_cell"></td>
 				<td class="setting_cell">
 					Soft/smooth type<br>

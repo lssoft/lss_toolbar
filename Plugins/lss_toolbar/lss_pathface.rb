@@ -27,6 +27,26 @@ class Lss_PathFace_Cmds
 		lss_pathface_cmd.tooltip = $lsstoolbarStrings.GetString("Click to activate '2 Faces + Path...' tool.")
 		$lssToolbar.add_item(lss_pathface_cmd)
 		$lssMenu.add_item(lss_pathface_cmd)
+		
+		edit_control_curve_cmd=UI::Command.new($lsstoolbarStrings.GetString("Edit Control Curve...")){
+			edit_cc_tool=Lss_Edit_CC_Tool.new
+			Sketchup.active_model.select_tool(edit_cc_tool)
+		}
+		selection=Sketchup.active_model.selection
+		UI.add_context_menu_handler do |context_menu|
+			if selection.count==1
+				ent=selection[0]
+				if ent.attribute_dictionaries.to_a.length>0
+					ent.attribute_dictionaries.each{|dict|
+						if dict.name.split("_")[0]=="lsspathface"
+							context_menu.add_separator
+							context_menu.add_item(edit_control_curve_cmd)
+							break
+						end
+					}
+				end
+			end
+		end
 	end
 end #class Lss_PathFace_Cmds
 
@@ -50,6 +70,8 @@ class Lss_PathFace_Entity
 	attr_accessor :cap_end
 	attr_accessor :soft_surf
 	attr_accessor :smooth_surf
+	attr_accessor :control_curve_pts
+	attr_accessor :control_curve_times
 	
 	attr_accessor :surf_group
 	attr_accessor :tracks_group
@@ -84,10 +106,11 @@ class Lss_PathFace_Entity
 		@faces_group_dicts=nil
 		
 		@entities=Sketchup.active_model.active_entities
+		@control_curve_pts=[[0, 0], [100, 100]]
+		@control_curve_times=1
 	end
 	
 	def generate_results
-		
 		# Store time as a key to identify parts of 'pathface entity' later
 		@lss_pathface_dict="lsspathface" + "_" + Time.now.to_f.to_s
 		
@@ -115,6 +138,16 @@ class Lss_PathFace_Entity
 		@first_face.set_attribute(@lss_pathface_dict, "cap_end", @cap_end)
 		@first_face.set_attribute(@lss_pathface_dict, "soft_surf", @soft_surf)
 		@first_face.set_attribute(@lss_pathface_dict, "smooth_surf", @smooth_surf)
+		@first_face.set_attribute(@lss_pathface_dict, "control_curve_times", @control_curve_times)
+		
+		# Store control curve points to the first face (added 11-Sep-12)
+		@first_face.attribute_dictionaries.delete("_control_curve") if @first_face.attribute_dictionaries["_control_curve"]
+		@control_curve_pts.each_index{|node_ind|
+			node_pt=@control_curve_pts[node_ind]
+			attr_str="_control_curve_pt_"+node_ind.to_s
+			node_pt_str=node_pt.join(",")
+			@first_face.set_attribute("_control_curve", attr_str, node_pt_str)
+		}
 		
 		# Restore other attributes if any
 		if @surf_group_dicts
@@ -369,6 +402,7 @@ class Lss_PathFace_Entity
 	end
 
 	def calculate_result_faces
+		@control_curve_pts.sort!{|a, b| a.x <=> b.x}
 		self.estimate_max_vert_cnt
 		@first_face_aligned_pts=Array.new
 		@second_face_aligned_pts=Array.new
@@ -465,8 +499,30 @@ class Lss_PathFace_Entity
 			pt1=face1_pts[pnt_ind1]
 			pt2=face2_pts[pnt_ind2]
 			vec=pt1.vector_to(pt2)
-			length_step=vec.length/(steps_cnt-1).to_f
-			vec.length=length_step*step.to_f if vec.length>0
+			#Control curve implementation (added 11-Sep-12)
+			x_pos=(@control_curve_times.to_f*(step.to_f)/(steps_cnt.to_f-1.0))-(@control_curve_times.to_f*(step.to_f-1.0)/(steps_cnt.to_f-1.0)).truncate
+			x_pos=100.0*x_pos
+			percentage=0
+			@control_curve_pts.each_index{|node_ind|
+				if node_ind<@control_curve_pts.length-1
+					node1=@control_curve_pts[node_ind]
+					node2=@control_curve_pts[node_ind+1]
+					x1=node1.x.to_f
+					x2=node2.x.to_f
+					percentage=node1.y if x_pos==x1
+					percentage=node2.y if x_pos==x2
+					if x2!=x1
+						if x_pos.between?(x1, x2)
+							k=(node2.y-node1.y).to_f/((x2-x1).to_f)
+							b=node1.y.to_f-k*(x1.to_f)
+							percentage=k*(x_pos.to_f)+b
+						end
+					else
+						percentage=(node2.y+node1.y)/2.0
+					end
+				end
+			}
+			vec.length=vec.length*percentage.to_f/100.0 if vec.length>0
 			result_pt=pt1.offset(vec)
 			morphed_face_pts<<result_pt
 			pnt_ind+=1
@@ -596,7 +652,28 @@ class Lss_PathFace_Entity
 		back_col2=back_mat2.color if back_mat2
 		alpha2=mat2.alpha if mat2
 		back_alpha2=back_mat2.alpha if back_mat2
-		k=step.to_f/(steps_cnt-1.0).to_f
+		#Control curve implementation (added 11-Sep-12)
+		x_pos=(@control_curve_times.to_f*(step.to_f)/(steps_cnt.to_f-1.0))-(@control_curve_times.to_f*(step.to_f)/(steps_cnt.to_f-1.0)).truncate
+		x_pos=x_pos*100.0
+		percentage=0
+		@control_curve_pts.each_index{|node_ind|
+			if node_ind<@control_curve_pts.length-1
+				node1=@control_curve_pts[node_ind]
+				node2=@control_curve_pts[node_ind+1]
+				x1=node1.x.to_f
+				x2=node2.x.to_f
+				percentage=node1.y if x_pos==x1
+				percentage=node2.y if x_pos==x2
+				if x2!=x1
+					if x_pos.between?(x1, x2)
+						k=(node2.y-node1.y).to_f/((x2-x1).to_f)
+						b=node1.y.to_f-k*(x1.to_f)
+						percentage=k*(x_pos.to_f)+b
+					end
+				end
+			end
+		}
+		k=percentage/100.0
 		morph_col=nil
 		if mat1 and mat2
 			r=(col1.red*(1.0-k)+col2.red*k).to_i
@@ -689,6 +766,9 @@ class Lss_Pathface_Refresh
 			pathface_entity.cap_end=@first_face.get_attribute(lss_pathface_attr_dict_name, "cap_end")
 			pathface_entity.soft_surf=@first_face.get_attribute(lss_pathface_attr_dict_name, "soft_surf")
 			pathface_entity.smooth_surf=@first_face.get_attribute(lss_pathface_attr_dict_name, "smooth_surf")
+			pathface_entity.control_curve_times=@first_face.get_attribute(lss_pathface_attr_dict_name, "control_curve_times")
+			self.get_control_curve
+			pathface_entity.control_curve_pts=@control_curve_pts
 			pathface_entity.calculate_result_faces
 			pathface_entity.generate_results
 			
@@ -701,6 +781,16 @@ class Lss_Pathface_Refresh
 		else
 			puts("")
 		end
+	end
+	
+	def get_control_curve
+		@control_curve_pts=Array.new
+		cc_attr_dict=@first_face.attribute_dictionaries["_control_curve"]
+		cc_attr_dict.each_key{|node_pt_name|
+			nodal_pt=cc_attr_dict[node_pt_name].split(",")
+			@control_curve_pts<<[nodal_pt[0].to_f, nodal_pt[1].to_f]
+		}
+		@control_curve_pts=[[0, 0], [100, 100]] if @control_curve_pts.length==0
 	end
 	
 	def assemble_pathface_obj(obj_name)
@@ -794,6 +884,14 @@ class Lss_PathFace_Tool
 		@settings_hash=Hash.new
 		
 		@result_faces=nil
+		
+		@control_curve_pts=[[0, 0], [100, 100]]
+		@adj_crv_win=Lss_Window.new($lsstoolbarStrings.GetString("Control Curve"), 100, 300, 300, 300, true)
+		@adj_crv_win.store_settings=true
+		@adj_crv_win.dict_name="pathface_adj_crv"
+		@control_curve=Lss_Control_Curve.new("Control Curve", 0, 0, 300, 300, true)
+		@control_curve.id="curve_control"
+		@adj_crv_win.client_area.add_control(@control_curve)
 	end
 	
 	def read_defaults
@@ -807,6 +905,7 @@ class Lss_PathFace_Tool
 		@soft_surf=Sketchup.read_default("LSS_Pathface", "soft_surf", "false")
 		@smooth_surf=Sketchup.read_default("LSS_Pathface", "smooth_surf", "false")
 		@transp_level=Sketchup.read_default("LSS_Pathface", "transp_level", 50).to_i
+		@control_curve_times=Sketchup.read_default("LSS_Pathface", "control_curve_times", 1).to_i
 		self.settings2hash
 	end
 	
@@ -821,6 +920,7 @@ class Lss_PathFace_Tool
 		@settings_hash["soft_surf"]=[@soft_surf, "boolean"]
 		@settings_hash["smooth_surf"]=[@smooth_surf, "boolean"]
 		@settings_hash["transp_level"]=[@transp_level, "integer"]
+		@settings_hash["control_curve_times"]=[@control_curve_times, "integer"]
 	end
 	
 	def hash2settings
@@ -834,6 +934,7 @@ class Lss_PathFace_Tool
 		@soft_surf=@settings_hash["soft_surf"][0]
 		@smooth_surf=@settings_hash["smooth_surf"][0]
 		@transp_level=@settings_hash["transp_level"][0]
+		@control_curve_times=@settings_hash["control_curve_times"][0]
 	end
 	
 	def write_defaults
@@ -925,6 +1026,10 @@ class Lss_PathFace_Tool
 				view=Sketchup.active_model.active_view
 				view.invalidate
 			end
+			if action_name=="edit_adj_crv"
+				@pick_state=nil
+				@adj_crv_win.show
+			end
 			if action_name.split(",")[0]=="obtain_setting" # From web-dialog
 				key=action_name.split(",")[1]
 				val=action_name.split(",")[2]
@@ -966,6 +1071,7 @@ class Lss_PathFace_Tool
 				end
 				self.hash2settings
 				@highlight_col1.alpha=1.0-@transp_level/100.0
+				@adj_crv_win.alpha=1.0-@transp_level/100.0
 			end
 			if action_name=="reset"
 				view=Sketchup.active_model.active_view
@@ -1081,6 +1187,8 @@ class Lss_PathFace_Tool
 			@pathface_entity.cap_end=@cap_end
 			@pathface_entity.soft_surf=@soft_surf
 			@pathface_entity.smooth_surf=@smooth_surf
+			@pathface_entity.control_curve_pts=@control_curve_pts
+			@pathface_entity.control_curve_times=@control_curve_times
 			@pathface_entity.calculate_result_faces
 			@result_faces=@pathface_entity.result_faces_pts
 			@result_mats=@pathface_entity.result_mats
@@ -1180,7 +1288,7 @@ class Lss_PathFace_Tool
 			UI.set_cursor(@def_cur_id)
 		end
 	end
-	  
+
 	def onMouseMove(flags, x, y, view)
 		@ip1.pick view, x, y
 		if( @ip1 != @ip )
@@ -1227,6 +1335,21 @@ class Lss_PathFace_Tool
 				@under_cur_invalid_bnds=nil
 			end
 		end
+		@adj_crv_win.onMouseMove(flags, x, y, view)
+		if @adj_crv_win.visible?
+			if @control_curve.node_dragging and @pathface_entity
+				@control_curve.generate_curve
+				@control_curve_pts=@control_curve.control_curve_pts
+				@pathface_entity.control_curve_pts=@control_curve_pts
+				@pathface_entity.control_curve_times=@control_curve_times
+				@pathface_entity.calculate_result_faces
+				@result_faces=@pathface_entity.result_faces_pts
+				@result_mats=@pathface_entity.result_mats
+				@result_normals=@pathface_entity.result_normals
+				@result_surf_pts=@pathface_entity.result_surf_pts
+				@result_tracks_pts=@pathface_entity.result_tracks_pts
+			end
+		end
 	end
 	
 	def draw(view)
@@ -1240,6 +1363,7 @@ class Lss_PathFace_Tool
 		self.draw_result_faces(view) if @generate_faces=="true"
 		self.draw_result_surf(view) if @generate_surf=="true"
 		self.draw_result_tracks(view) if @generate_tracks=="true"
+		@adj_crv_win.draw(view)
 	end
 	
 	def draw_pick_state(view)
@@ -1489,11 +1613,16 @@ class Lss_PathFace_Tool
 		
 		self.read_defaults
 		self.send_settings2dlg
+		@adj_crv_win.reset(view)
 	end
 
 	def deactivate(view)
 		@pathface_dialog.close
 		self.reset(view)
+	end
+	
+	def onLButtonDown(flags, x, y, view)
+		@adj_crv_win.onLButtonDown(flags, x, y, view)
 	end
 
 	# Pick entities by single click
@@ -1562,6 +1691,7 @@ class Lss_PathFace_Tool
 			@pick_state=nil
 		end
 		self.send_settings2dlg
+		@adj_crv_win.onLButtonUp(flags, x, y, view)
 	end
 	
 	def send_first_face2dlg
@@ -1723,16 +1853,17 @@ class Lss_PathFace_Tool
 	# 
 	def onLButtonDoubleClick(flags, x, y, view)
 		@ip.pick view, x, y
-		
+		@adj_crv_win.onLButtonDoubleClick(flags, x, y, view)
 	end
 
 	# Handle some hot-key strokes while the tool is active
 	def onKeyUp(key, repeat, flags, view)
-
+		@adj_crv_win.onKeyUp(key, repeat, flags, view)
 	end
 
 	def onCancel(reason, view)
 		self.reset(view)
+		@adj_crv_win.onCancel(reason, view)
 	end
 
 	def enableVCB?
@@ -1741,7 +1872,7 @@ class Lss_PathFace_Tool
 
 	# Use entered from the keyboard number
 	def onUserText(text, view)
-
+		@adj_crv_win.onUserText(text, view)
 	end
 
 	# Tool context menu
@@ -1756,6 +1887,177 @@ class Lss_PathFace_Tool
 	
 end #class Lss_PathFace_Tool
 
+class Lss_Edit_CC_Tool
+	def initialize
+		@model=Sketchup.active_model
+		@entities=@model.active_entities
+		@selection=@model.selection
+		
+		@first_face=nil
+		@second_face=nil
+		@path_curve=nil
+	end
+	
+	def activate
+		@pathface_dict=nil
+		if @selection.count==1
+			ent=@selection[0]
+			if ent.attribute_dictionaries.to_a.length>0
+				ent.attribute_dictionaries.each{|dict|
+					if dict.name.split("_")[0]=="lsspathface"
+						@pathface_dict=dict
+						break
+					end
+				}
+			end
+		end
+		return if @pathface_dict.nil?
+		self.assemble_pathface_obj(@pathface_dict.name)
+		self.get_control_curve
+		@adj_crv_win=Lss_Window.new($lsstoolbarStrings.GetString("Control Curve"), 100, 300, 300, 300, true)
+		@adj_crv_win.store_settings=true
+		@adj_crv_win.dict_name="pathface_adj_crv"
+		@control_curve=Lss_Control_Curve.new("Control Curve", 0, 0, 300, 300, true)
+		@control_curve.id="curve_control"
+		@control_curve.control_curve_pts=@control_curve_pts
+		@control_curve.get_curve_pts
+		@adj_crv_win.client_area.add_control(@control_curve)
+		
+		@adj_crv_win.show
+	end
+	
+	def assemble_pathface_obj(obj_name)
+		@first_face=nil
+		@second_face=nil
+		@path_curve=nil
+		@surf_group=nil
+		@tracks_group=nil
+		@faces_group=nil
+		@entities.each{|ent|
+			if ent.attribute_dictionaries.to_a.length>0
+				chk_obj_dict=ent.attribute_dictionaries[@pathface_dict.name]
+				if chk_obj_dict
+					case chk_obj_dict["inst_type"]
+						when "first_face"
+						@first_face=ent
+						when "second_face"
+						@second_face=ent
+						when "path_curve"
+						@path_curve=ent.curve
+						when "surface_group"
+						@surf_group=ent
+						when "tracks_group"
+						@tracks_group=ent
+						when "faces_group"
+						@faces_group=ent
+					end
+				end
+			end
+		}
+	end
+	
+	def get_control_curve
+		@control_curve_pts=Array.new
+		cc_attr_dict=@first_face.attribute_dictionaries["_control_curve"]
+		cc_attr_dict.each_key{|node_pt_name|
+			nodal_pt=cc_attr_dict[node_pt_name].split(",")
+			@control_curve_pts<<[nodal_pt[0].to_f, nodal_pt[1].to_f]
+		}
+		@control_curve_pts=[[0, 0], [100, 100]] if @control_curve_pts.length==0
+	end
+
+	def onSetCursor
+		@adj_crv_win.setCursor
+	end
+	  
+	def onMouseMove(flags, x, y, view)
+		@adj_crv_win.onMouseMove(flags, x, y, view)
+	end
+	
+	def draw(view)
+		@adj_crv_win.draw(view)
+	end
+	
+	def reset(view)
+		@adj_crv_win.reset(view)
+	end
+
+	def deactivate(view)
+		self.reset(view)
+		@adj_crv_win.hide
+	end
+
+	def onLButtonUp(flags, x, y, view)
+		@adj_crv_win.onLButtonUp(flags, x, y, view)
+		@control_curve.controls.each{|control|
+			control.check_over_state(flags, x, y, view)
+			if control.cur_state=="over"
+				if control.draggable
+					@control_curve.generate_curve
+					@control_curve_pts=@control_curve.control_curve_pts
+					self.refresh_curve_pts
+					Lss_Pathface_Refresh.new.refresh
+					break
+				end
+			end
+		}
+		if @adj_crv_win.closed
+			@control_curve.generate_curve
+			@control_curve_pts=@control_curve.control_curve_pts
+			self.refresh_curve_pts
+			Lss_Pathface_Refresh.new.refresh
+			Sketchup.active_model.select_tool(nil)
+		end
+	end
+	
+	def onLButtonDown(flags, x, y, view)
+		@adj_crv_win.onLButtonDown(flags, x, y, view)
+	end
+
+	def onLButtonDoubleClick(flags, x, y, view)
+		@adj_crv_win.onLButtonDoubleClick(flags, x, y, view)
+	end
+
+	# Handle some hot-key strokes while the tool is active
+	def onKeyUp(key, repeat, flags, view)
+		if key==VK_HOME
+			@control_curve.generate_curve
+			@control_curve_pts=@control_curve.control_curve_pts
+			self.refresh_curve_pts
+			Lss_Pathface_Refresh.new.refresh
+		end
+		@adj_crv_win.onKeyUp(key, repeat, flags, view)
+	end
+
+	def onCancel(reason, view)
+		@adj_crv_win.onCancel(reason, view)
+	end
+
+	def enableVCB?
+		return true
+	end
+
+	# Use entered from the keyboard number
+	def onUserText(text, view)
+		@adj_crv_win.onUserText(text, view)
+	end
+
+	# Tool context menu
+	def getMenu(menu)
+		@adj_crv_win.getMenu(menu)
+	end
+	
+	def refresh_curve_pts
+		# Store control curve points to the first face (added 11-Sep-12)
+		@first_face.attribute_dictionaries.delete("_control_curve") if @first_face.attribute_dictionaries["_control_curve"]
+		@control_curve_pts.each_index{|node_ind|
+			node_pt=@control_curve_pts[node_ind]
+			attr_str="_control_curve_pt_"+node_ind.to_s
+			node_pt_str=node_pt.join(",")
+			@first_face.set_attribute("_control_curve", attr_str, node_pt_str)
+		}
+	end
+end
 
 if( not file_loaded?("lss_pathface.rb") )
   Lss_PathFace_Cmds.new
